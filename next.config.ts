@@ -1,7 +1,18 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Exclude native modules from bundling - they will be loaded at runtime
+  serverExternalPackages: ['sweph'],
+
+  // Webpack config for native module handling
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      // Don't bundle native modules
+      config.externals = config.externals || [];
+      config.externals.push('sweph');
+    }
+    return config;
+  },
 };
 
 export default nextConfig;

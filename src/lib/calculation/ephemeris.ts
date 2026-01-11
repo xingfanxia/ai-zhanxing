@@ -3,8 +3,11 @@
  *
  * Provides high-level functions for calculating planet positions and house cusps
  * using the Swiss Ephemeris library (sweph).
+ *
+ * @server-only - This module uses native bindings and can only run on the server
  */
 
+import 'server-only';
 import sweph from 'sweph';
 import {
   Planet,
