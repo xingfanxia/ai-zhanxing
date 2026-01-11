@@ -45,13 +45,13 @@ export default function TarotResultPage({
   useEffect(() => {
     const fetchReadingData = async () => {
       try {
-        // Check if ID is a UUID (database reading) or temp ID
-        const isDbReading = isValidUUID(resolvedParams.id);
-        setIsFromDatabase(isDbReading);
+        const id = resolvedParams.id;
 
-        if (isDbReading) {
+        // Check if ID is a UUID (database reading) or temp ID (sessionStorage)
+        if (isValidUUID(id)) {
           // Load from database
-          const response = await fetch(`/api/tarot/readings/${resolvedParams.id}`);
+          setIsFromDatabase(true);
+          const response = await fetch(`/api/tarot/readings/${id}`);
           if (response.status === 401) {
             throw new Error("Please sign in to view this reading");
           }
@@ -68,17 +68,35 @@ export default function TarotResultPage({
           if (data.result_data?.interpretation) {
             setInterpretation(data.result_data.interpretation);
           }
+        } else if (id.startsWith("temp_")) {
+          // Load from sessionStorage for temporary readings
+          setIsFromDatabase(false);
+          const storedData = sessionStorage.getItem(`tarot_reading_${id}`);
+
+          if (!storedData) {
+            throw new Error("Reading not found. It may have expired.");
+          }
+
+          const data = JSON.parse(storedData);
+
+          // Transform sessionStorage format to reading format
+          const transformedReading: ReadingData = {
+            id: id,
+            question: data.question || undefined,
+            spreadType: data.spread?.id || data.spread_type || "unknown",
+            cards: data.cards.map((card: { position: number; positionName: { en: string }; positionMeaning?: string; card: { name: { en: string }; keywords: string[]; upright: string; reversed: string; suit?: string }; reversed: boolean }) => ({
+              name: card.card?.name?.en || "Unknown Card",
+              position: card.positionName?.en || `Position ${card.position}`,
+              reversed: card.reversed || false,
+              meaning: card.reversed ? card.card?.reversed : card.card?.upright || "",
+              keywords: card.card?.keywords || [],
+              suit: card.card?.suit,
+            })),
+          };
+
+          setReadingData(transformedReading);
         } else {
-          // Load from temporary storage (existing flow)
-          const response = await fetch(`/api/tarot/${resolvedParams.id}`);
-          if (!response.ok) {
-            throw new Error("Reading not found");
-          }
-          const data = await response.json();
-          setReadingData(data);
-          if (data.interpretation) {
-            setInterpretation(data.interpretation);
-          }
+          throw new Error("Invalid reading ID");
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load reading");

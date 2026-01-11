@@ -17,13 +17,13 @@ const spreadTypes = [
     cards: 1,
   },
   {
-    value: "three-card",
+    value: "three_card",
     label: "Three Card Spread",
     description: "Past, Present, Future or Situation, Action, Outcome",
     cards: 3,
   },
   {
-    value: "celtic-cross",
+    value: "celtic_cross",
     label: "Celtic Cross",
     description: "Comprehensive 10-card reading for deep insight",
     cards: 10,
@@ -36,7 +36,7 @@ export default function TarotPage() {
   const [error, setError] = useState<string | null>(null);
 
   const [question, setQuestion] = useState("");
-  const [selectedSpread, setSelectedSpread] = useState("three-card");
+  const [selectedSpread, setSelectedSpread] = useState("three_card");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,17 +49,28 @@ export default function TarotPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           question: question || null,
-          spreadType: selectedSpread,
+          spread_type: selectedSpread,
         }),
       });
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || "Failed to draw cards");
+        throw new Error(data.message || data.error || "Failed to draw cards");
       }
 
       const result = await response.json();
-      router.push(`/tarot/${result.id}`);
+
+      // Generate a temporary ID and store reading data in sessionStorage
+      const tempId = `temp_${Date.now()}`;
+      const readingData = {
+        ...result.data,
+        question: question || null,
+        spread_type: selectedSpread,
+        createdAt: new Date().toISOString(),
+      };
+      sessionStorage.setItem(`tarot_reading_${tempId}`, JSON.stringify(readingData));
+
+      router.push(`/tarot/${tempId}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
