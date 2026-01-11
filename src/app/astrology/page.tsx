@@ -8,6 +8,7 @@ import { ArrowLeft, Calendar, Clock, MapPin, Settings, Loader2 } from "lucide-re
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { CitySearch, type CityResult } from "@/components/CitySearch";
 
 const houseSystems = [
   { value: "placidus", label: "Placidus (Default)" },
@@ -29,12 +30,24 @@ export default function AstrologyPage() {
     city: "",
     latitude: "",
     longitude: "",
+    timezone: "",
     houseSystem: "placidus",
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    setError(null);
+  };
+
+  const handleCitySelect = (city: CityResult) => {
+    setFormData((prev) => ({
+      ...prev,
+      city: city.displayName,
+      latitude: city.latitude.toString(),
+      longitude: city.longitude.toString(),
+      timezone: city.timezone || prev.timezone,
+    }));
     setError(null);
   };
 
@@ -64,7 +77,7 @@ export default function AstrologyPage() {
       const birthData = {
         date: formData.birthDate, // Already in YYYY-MM-DD from date input
         time: formData.birthTime, // Already in HH:MM from time input
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, // Use browser timezone
+        timezone: formData.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone, // Use city timezone or browser fallback
         latitude: lat,
         longitude: lng,
       };
@@ -173,41 +186,66 @@ export default function AstrologyPage() {
                     <MapPin className="w-4 h-4 mr-2 text-purple-400" />
                     Birth Location
                   </label>
-                  <Input
-                    type="text"
-                    name="city"
+                  <CitySearch
                     value={formData.city}
-                    onChange={handleInputChange}
-                    placeholder="City name (e.g., New York)"
-                    className="bg-slate-800/50 border-slate-700 text-slate-100 placeholder:text-slate-500"
+                    onSelect={handleCitySelect}
+                    placeholder="Search for a city (e.g., New York, Tokyo, London)"
                   />
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Input
-                        type="number"
-                        name="latitude"
-                        value={formData.latitude}
-                        onChange={handleInputChange}
-                        placeholder="Latitude (e.g., 40.7128)"
-                        step="0.0001"
-                        className="bg-slate-800/50 border-slate-700 text-slate-100 placeholder:text-slate-500"
-                      />
+
+                  {/* Show coordinates when filled */}
+                  {formData.latitude && formData.longitude && (
+                    <div className="p-3 rounded-lg bg-purple-500/10 border border-purple-500/20">
+                      <p className="text-xs text-purple-300 mb-2">
+                        Coordinates auto-filled from city selection:
+                      </p>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <span className="text-slate-400">Lat:</span>{" "}
+                          <span className="text-slate-200">{formData.latitude}</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-400">Lng:</span>{" "}
+                          <span className="text-slate-200">{formData.longitude}</span>
+                        </div>
+                      </div>
+                      {formData.timezone && (
+                        <div className="mt-1 text-xs text-slate-400">
+                          Timezone: {formData.timezone}
+                        </div>
+                      )}
                     </div>
-                    <div>
-                      <Input
-                        type="number"
-                        name="longitude"
-                        value={formData.longitude}
-                        onChange={handleInputChange}
-                        placeholder="Longitude (e.g., -74.0060)"
-                        step="0.0001"
-                        className="bg-slate-800/50 border-slate-700 text-slate-100 placeholder:text-slate-500"
-                      />
+                  )}
+
+                  {/* Manual coordinate entry (collapsible) */}
+                  <details className="text-sm">
+                    <summary className="text-slate-400 cursor-pointer hover:text-slate-300">
+                      Or enter coordinates manually
+                    </summary>
+                    <div className="grid grid-cols-2 gap-4 mt-3">
+                      <div>
+                        <Input
+                          type="number"
+                          name="latitude"
+                          value={formData.latitude}
+                          onChange={handleInputChange}
+                          placeholder="Latitude (e.g., 40.7128)"
+                          step="0.0001"
+                          className="bg-slate-800/50 border-slate-700 text-slate-100 placeholder:text-slate-500"
+                        />
+                      </div>
+                      <div>
+                        <Input
+                          type="number"
+                          name="longitude"
+                          value={formData.longitude}
+                          onChange={handleInputChange}
+                          placeholder="Longitude (e.g., -74.0060)"
+                          step="0.0001"
+                          className="bg-slate-800/50 border-slate-700 text-slate-100 placeholder:text-slate-500"
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <p className="text-xs text-slate-500">
-                    Enter city name or coordinates. Coordinates provide more accurate calculations.
-                  </p>
+                  </details>
                 </div>
 
                 {/* House System */}
