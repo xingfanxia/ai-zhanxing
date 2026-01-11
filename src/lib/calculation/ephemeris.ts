@@ -142,8 +142,10 @@ export function calculatePlanetPosition(
     planetId = useTrueNode ? constants.SE_TRUE_NODE : constants.SE_MEAN_NODE;
   }
 
-  // Calculate flags: use Swiss Ephemeris + get speed
-  const flags = constants.SEFLG_SWIEPH | constants.SEFLG_SPEED;
+  // Calculate flags: use Moshier ephemeris (built-in, no external files needed) + get speed
+  // Note: Moshier is less accurate but works without external ephemeris files
+  // For production, consider downloading Swiss Ephemeris files for higher accuracy
+  const flags = constants.SEFLG_MOSEPH | constants.SEFLG_SPEED;
 
   // Call Swiss Ephemeris
   const result = calc(jdET, planetId, flags);

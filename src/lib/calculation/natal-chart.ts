@@ -89,7 +89,8 @@ const DEFAULT_OPTIONS: Required<CalculationOptions> = {
   houseSystem: 'Placidus',
   includeMinorAspects: false,
   customOrbs: {},
-  includeChiron: true,
+  // Chiron requires Swiss Ephemeris files - disabled by default when using Moshier
+  includeChiron: false,
   useTrueNode: true
 };
 
