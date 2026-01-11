@@ -36,6 +36,7 @@ export interface Database {
           reading_type: string;
           input_data: Record<string, unknown>;
           result_data: Record<string, unknown>;
+          title: string | null;
           created_at: string;
         };
         Insert: {
@@ -44,6 +45,7 @@ export interface Database {
           reading_type: string;
           input_data: Record<string, unknown>;
           result_data: Record<string, unknown>;
+          title?: string | null;
           created_at?: string;
         };
         Update: {
@@ -52,6 +54,7 @@ export interface Database {
           reading_type?: string;
           input_data?: Record<string, unknown>;
           result_data?: Record<string, unknown>;
+          title?: string | null;
           created_at?: string;
         };
       };

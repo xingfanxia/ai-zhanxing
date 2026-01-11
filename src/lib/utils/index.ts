@@ -13,3 +13,4 @@ export {
   loadFromLocalStorage,
   ZhanxingStorage,
 } from './storage';
+export { isValidUUID } from './validation';

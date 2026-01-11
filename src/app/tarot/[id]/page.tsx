@@ -3,11 +3,12 @@
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowLeft, Sparkles, Loader2 } from "lucide-react";
+import { ArrowLeft, Sparkles, Loader2, Save, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChatInterface } from "@/components/chat/ChatInterface";
 import { TarotCard as TarotCardComponent } from "@/components/tarot";
+import { isValidUUID } from "@/lib/utils/validation";
 
 interface TarotCardData {
   name: string;
@@ -37,18 +38,47 @@ export default function TarotResultPage({
   const [isInterpretationLoading, setIsInterpretationLoading] = useState(false);
   const [interpretation, setInterpretation] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [savedReadingId, setSavedReadingId] = useState<string | null>(null);
+  const [isFromDatabase, setIsFromDatabase] = useState(false);
 
   useEffect(() => {
     const fetchReadingData = async () => {
       try {
-        const response = await fetch(`/api/tarot/${resolvedParams.id}`);
-        if (!response.ok) {
-          throw new Error("Reading not found");
-        }
-        const data = await response.json();
-        setReadingData(data);
-        if (data.interpretation) {
-          setInterpretation(data.interpretation);
+        // Check if ID is a UUID (database reading) or temp ID
+        const isDbReading = isValidUUID(resolvedParams.id);
+        setIsFromDatabase(isDbReading);
+
+        if (isDbReading) {
+          // Load from database
+          const response = await fetch(`/api/tarot/readings/${resolvedParams.id}`);
+          if (response.status === 401) {
+            throw new Error("Please sign in to view this reading");
+          }
+          if (!response.ok) {
+            throw new Error("Reading not found");
+          }
+          const { data } = await response.json();
+
+          // Transform database format to reading format
+          const transformedReading = transformDatabaseToReading(data);
+          setReadingData(transformedReading);
+          setSavedReadingId(data.id);
+
+          if (data.result_data?.interpretation) {
+            setInterpretation(data.result_data.interpretation);
+          }
+        } else {
+          // Load from temporary storage (existing flow)
+          const response = await fetch(`/api/tarot/${resolvedParams.id}`);
+          if (!response.ok) {
+            throw new Error("Reading not found");
+          }
+          const data = await response.json();
+          setReadingData(data);
+          if (data.interpretation) {
+            setInterpretation(data.interpretation);
+          }
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load reading");
@@ -75,6 +105,69 @@ export default function TarotResultPage({
       setError(err instanceof Error ? err.message : "Failed to get interpretation");
     } finally {
       setIsInterpretationLoading(false);
+    }
+  };
+
+  const handleSaveReading = async () => {
+    if (!readingData || !interpretation) return;
+
+    setIsSaving(true);
+    try {
+      const inputData = {
+        spreadType: readingData.spreadType,
+        question: readingData.question,
+        cards: readingData.cards.map(card => ({
+          name: card.name,
+          position: card.position,
+          reversed: card.reversed,
+        })),
+      };
+
+      const resultData = {
+        interpretation,
+        cardMeanings: readingData.cards.map(card => ({
+          name: card.name,
+          meaning: card.meaning,
+          keywords: card.keywords,
+        })),
+      };
+
+      if (savedReadingId) {
+        // Update existing reading
+        const response = await fetch(`/api/tarot/readings/${savedReadingId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ inputData, resultData }),
+        });
+
+        if (response.status === 401) {
+          throw new Error("Please sign in to update readings");
+        }
+        if (!response.ok) {
+          throw new Error("Failed to update reading");
+        }
+      } else {
+        // Create new reading
+        const response = await fetch("/api/tarot/readings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ inputData, resultData }),
+        });
+
+        if (response.status === 401) {
+          throw new Error("Please sign in to save readings");
+        }
+        if (!response.ok) {
+          throw new Error("Failed to save reading");
+        }
+
+        const { data } = await response.json();
+        setSavedReadingId(data.id);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save reading");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -120,14 +213,23 @@ export default function TarotResultPage({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          {/* Back button */}
-          <Link
-            href="/tarot"
-            className="inline-flex items-center text-slate-400 hover:text-slate-200 mb-8"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            New Reading
-          </Link>
+          {/* Navigation */}
+          <div className="flex items-center justify-between mb-8">
+            <Link
+              href="/tarot"
+              className="inline-flex items-center text-slate-400 hover:text-slate-200"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              New Reading
+            </Link>
+            <Link
+              href="/readings"
+              className="inline-flex items-center text-slate-400 hover:text-slate-200"
+            >
+              <BookOpen className="w-4 h-4 mr-2" />
+              My Readings
+            </Link>
+          </div>
 
           {/* Reading Info */}
           <Card className="bg-slate-900/50 border-pink-500/20 backdrop-blur-sm mb-6">
@@ -135,6 +237,11 @@ export default function TarotResultPage({
               <CardTitle className="text-xl text-pink-300 flex items-center gap-2">
                 <Sparkles className="w-5 h-5" />
                 {getSpreadLabel(readingData.spreadType)}
+                {savedReadingId && (
+                  <span className="text-xs bg-pink-500/20 px-2 py-1 rounded text-pink-300 ml-2">
+                    Saved
+                  </span>
+                )}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -210,9 +317,37 @@ export default function TarotResultPage({
           {/* AI Interpretation */}
           <Card className="bg-slate-900/50 border-pink-500/20 backdrop-blur-sm mb-6">
             <CardHeader>
-              <CardTitle className="text-xl text-pink-300 flex items-center gap-2">
-                <Sparkles className="w-5 h-5" />
-                AI Interpretation
+              <CardTitle className="text-xl text-pink-300 flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5" />
+                  AI Interpretation
+                </span>
+                {interpretation && (
+                  <Button
+                    variant="mystical-outline"
+                    size="sm"
+                    onClick={handleSaveReading}
+                    disabled={isSaving}
+                    className="border-pink-500/30 hover:border-pink-500/50"
+                  >
+                    {isSaving ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Saving...
+                      </>
+                    ) : savedReadingId ? (
+                      <>
+                        <Save className="w-4 h-4 mr-2" />
+                        Update
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4 mr-2" />
+                        Save
+                      </>
+                    )}
+                  </Button>
+                )}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -268,4 +403,40 @@ export default function TarotResultPage({
       </div>
     </div>
   );
+}
+
+// Helper to transform database format to reading display format
+function transformDatabaseToReading(data: {
+  id: string;
+  input_data: Record<string, unknown>;
+  result_data: Record<string, unknown>;
+}): ReadingData {
+  const inputData = data.input_data as {
+    spreadType?: string;
+    question?: string;
+    cards?: Array<{ name: string; position: string; reversed: boolean; suit?: string }>;
+  };
+  const resultData = data.result_data as {
+    cardMeanings?: Array<{ name: string; meaning: string; keywords: string[] }>;
+  };
+
+  const cards = inputData.cards || [];
+  const cardMeanings = resultData.cardMeanings || [];
+
+  return {
+    id: data.id,
+    spreadType: inputData.spreadType || "single",
+    question: inputData.question,
+    cards: cards.map((card, index) => {
+      const meaning = cardMeanings[index] || { meaning: "", keywords: [] };
+      return {
+        name: card.name,
+        position: card.position,
+        reversed: card.reversed,
+        meaning: meaning.meaning,
+        keywords: meaning.keywords || [],
+        suit: card.suit,
+      };
+    }),
+  };
 }
