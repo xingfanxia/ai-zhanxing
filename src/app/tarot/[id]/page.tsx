@@ -19,6 +19,23 @@ interface TarotCardData {
   suit?: string;
 }
 
+// Original card data from API (needed for interpretation)
+interface OriginalCardData {
+  position: number;
+  positionName: { en: string };
+  positionMeaning?: string;
+  card: {
+    number: number;
+    name: { en: string };
+    arcana: string;
+    suit?: string;
+    keywords: string[];
+    upright: string;
+    reversed: string;
+  };
+  reversed: boolean;
+}
+
 interface ReadingData {
   id: string;
   question?: string;
@@ -41,6 +58,8 @@ export default function TarotResultPage({
   const [isSaving, setIsSaving] = useState(false);
   const [savedReadingId, setSavedReadingId] = useState<string | null>(null);
   const [isFromDatabase, setIsFromDatabase] = useState(false);
+  // Store original card data for interpretation API
+  const [originalCards, setOriginalCards] = useState<OriginalCardData[] | null>(null);
 
   useEffect(() => {
     const fetchReadingData = async () => {
@@ -79,6 +98,9 @@ export default function TarotResultPage({
 
           const data = JSON.parse(storedData);
 
+          // Store original cards for interpretation API
+          setOriginalCards(data.cards);
+
           // Transform sessionStorage format to reading format
           const transformedReading: ReadingData = {
             id: id,
@@ -109,16 +131,73 @@ export default function TarotResultPage({
   }, [resolvedParams.id]);
 
   const handleGetInterpretation = async () => {
+    if (!readingData) return;
+
     setIsInterpretationLoading(true);
+    setError(null);
+
     try {
-      const response = await fetch(`/api/tarot/${resolvedParams.id}/interpret`, {
-        method: "POST",
-      });
-      if (!response.ok) {
-        throw new Error("Failed to get interpretation");
+      // For temp readings, use original cards from sessionStorage
+      // For database readings, we need to reconstruct the format
+      let cardsForApi;
+
+      if (originalCards) {
+        // Transform to API expected format
+        cardsForApi = originalCards.map((card) => ({
+          position: card.position,
+          positionName: card.positionName?.en || `Position ${card.position}`,
+          positionMeaning: card.positionMeaning || "",
+          card: {
+            number: card.card?.number || 0,
+            name: card.card?.name || { en: "Unknown" },
+            arcana: card.card?.arcana || "unknown",
+            suit: card.card?.suit,
+            keywords: card.card?.keywords || [],
+            upright: card.card?.upright || "",
+            reversed: card.card?.reversed || "",
+          },
+          reversed: card.reversed,
+        }));
+      } else {
+        // Fallback: construct from display data (less detailed)
+        cardsForApi = readingData.cards.map((card, index) => ({
+          position: index + 1,
+          positionName: card.position,
+          positionMeaning: card.position,
+          card: {
+            number: index,
+            name: { en: card.name },
+            arcana: card.suit ? "minor" : "major",
+            suit: card.suit,
+            keywords: card.keywords,
+            upright: card.reversed ? "" : card.meaning,
+            reversed: card.reversed ? card.meaning : "",
+          },
+          reversed: card.reversed,
+        }));
       }
+
+      const response = await fetch("/api/tarot/interpret", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cards: cardsForApi,
+          question: readingData.question || "General guidance for my life path",
+          spread_type: readingData.spreadType,
+        }),
+      });
+
+      if (response.status === 401) {
+        throw new Error("Please sign in to get AI interpretation");
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to get interpretation");
+      }
+
       const data = await response.json();
-      setInterpretation(data.interpretation);
+      setInterpretation(data.data?.interpretation || data.interpretation);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to get interpretation");
     } finally {

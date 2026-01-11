@@ -146,6 +146,8 @@ export default function AstrologyResultPage({
   const [isSaving, setIsSaving] = useState(false);
   const [savedReadingId, setSavedReadingId] = useState<string | null>(null);
   const [isFromDatabase, setIsFromDatabase] = useState(false);
+  // Store original chart data for interpretation API
+  const [originalChartData, setOriginalChartData] = useState<Record<string, unknown> | null>(null);
 
   useEffect(() => {
     const fetchChartData = async () => {
@@ -186,6 +188,9 @@ export default function AstrologyResultPage({
           }
 
           const data = JSON.parse(storedData);
+
+          // Store original data for interpretation API
+          setOriginalChartData(data);
 
           // Transform API response format to ChartData format
           const transformedChart: ChartData = {
@@ -240,16 +245,87 @@ export default function AstrologyResultPage({
   }, [resolvedParams.id]);
 
   const handleGetInterpretation = async () => {
+    if (!chartData) return;
+
     setIsInterpretationLoading(true);
+    setError(null);
+
     try {
-      const response = await fetch(`/api/astrology/${resolvedParams.id}/interpret`, {
-        method: "POST",
-      });
-      if (!response.ok) {
-        throw new Error("Failed to get interpretation");
+      // Build chart data for API
+      let chartForApi;
+
+      if (originalChartData) {
+        // Use original data from sessionStorage (has correct NatalChart format)
+        chartForApi = {
+          planets: originalChartData.planets,
+          houses: originalChartData.houses,
+          aspects: originalChartData.aspects,
+          ascendant: originalChartData.ascendant || {
+            sign: chartData.houses[0]?.sign || "Aries",
+            degreeInSign: chartData.houses[0]?.degree || 0,
+          },
+          midheaven: originalChartData.midheaven || {
+            sign: chartData.houses[9]?.sign || "Capricorn",
+            degreeInSign: chartData.houses[9]?.degree || 0,
+          },
+        };
+      } else {
+        // Reconstruct from display data
+        const planetsObj: Record<string, unknown> = {};
+        chartData.planets.forEach((p) => {
+          planetsObj[p.name] = {
+            sign: p.sign,
+            degreeInSign: p.degree,
+            retrograde: p.retrograde,
+            longitude: (["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"].indexOf(p.sign) * 30) + p.degree,
+          };
+        });
+
+        chartForApi = {
+          planets: planetsObj,
+          houses: {
+            system: "Placidus",
+            cusps: chartData.houses.map(h => {
+              const signIndex = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"].indexOf(h.sign);
+              return signIndex * 30 + h.degree;
+            }),
+          },
+          aspects: chartData.aspects.map(a => ({
+            planet1: a.planet1,
+            planet2: a.planet2,
+            type: a.type,
+            orb: a.orb,
+          })),
+          ascendant: {
+            sign: chartData.houses[0]?.sign || "Aries",
+            degreeInSign: chartData.houses[0]?.degree || 0,
+          },
+          midheaven: {
+            sign: chartData.houses[9]?.sign || "Capricorn",
+            degreeInSign: chartData.houses[9]?.degree || 0,
+          },
+        };
       }
+
+      const response = await fetch("/api/astrology/interpret", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chart: chartForApi,
+        }),
+      });
+
+      if (response.status === 401) {
+        throw new Error("Please sign in to get AI interpretation");
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to get interpretation");
+      }
+
       const data = await response.json();
-      setInterpretation(data.interpretation);
+      setInterpretation(data.data?.interpretation || data.interpretation);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to get interpretation");
     } finally {
