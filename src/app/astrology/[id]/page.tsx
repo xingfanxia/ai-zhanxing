@@ -1,12 +1,21 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, use, useMemo } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowLeft, Sparkles, Loader2, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChatInterface } from "@/components/chat/ChatInterface";
+import { NatalChartWheel } from "@/components/astrology";
+import type {
+  Planet as PlanetType,
+  PlanetPosition,
+  HouseCusps,
+  Aspect as AspectTypeData,
+  AspectType,
+  ZodiacSign,
+} from "@/lib/calculation/types";
 
 interface Planet {
   name: string;
@@ -21,6 +30,7 @@ interface Aspect {
   planet2: string;
   type: string;
   orb: number;
+  strength?: number;
 }
 
 interface ChartData {
@@ -32,6 +42,117 @@ interface ChartData {
   houses: { number: number; sign: string; degree: number }[];
   aspects: Aspect[];
   interpretation?: string;
+}
+
+// Map sign name to index for calculating absolute longitude
+const SIGN_TO_INDEX: Record<string, number> = {
+  Aries: 0, Taurus: 1, Gemini: 2, Cancer: 3,
+  Leo: 4, Virgo: 5, Libra: 6, Scorpio: 7,
+  Sagittarius: 8, Capricorn: 9, Aquarius: 10, Pisces: 11,
+};
+
+/**
+ * Convert API planet data to chart wheel format
+ */
+function convertPlanetsForWheel(
+  planets: Planet[]
+): Record<string, PlanetPosition> {
+  const result: Record<string, PlanetPosition> = {};
+
+  planets.forEach((planet) => {
+    const signIndex = SIGN_TO_INDEX[planet.sign] ?? 0;
+    const longitude = signIndex * 30 + planet.degree;
+
+    result[planet.name] = {
+      planet: planet.name as PlanetType,
+      longitude,
+      latitude: 0,
+      distance: 1,
+      speed: 1,
+      retrograde: planet.retrograde ?? false,
+      sign: planet.sign as ZodiacSign,
+      degreeInSign: planet.degree,
+      minutes: 0,
+      seconds: 0,
+    };
+  });
+
+  return result;
+}
+
+/**
+ * Convert API house data to chart wheel format
+ */
+function convertHousesForWheel(
+  houses: { number: number; sign: string; degree: number }[]
+): HouseCusps {
+  const cusps = houses
+    .sort((a, b) => a.number - b.number)
+    .map((h) => {
+      const signIndex = SIGN_TO_INDEX[h.sign] ?? 0;
+      return signIndex * 30 + h.degree;
+    });
+
+  const ascendant = cusps[0] ?? 0;
+  const midheaven = cusps[9] ?? 0;
+
+  return {
+    system: "Placidus",
+    cusps,
+    ascendant,
+    midheaven,
+    descendant: (ascendant + 180) % 360,
+    ic: (midheaven + 180) % 360,
+    vertex: 0,
+  };
+}
+
+/**
+ * Convert API aspect data to chart wheel format
+ */
+function convertAspectsForWheel(aspects: Aspect[]): AspectTypeData[] {
+  return aspects.map((aspect) => ({
+    planet1: aspect.planet1 as PlanetType,
+    planet2: aspect.planet2 as PlanetType,
+    type: aspect.type as AspectType,
+    exactAngle: getAspectAngle(aspect.type),
+    actualAngle: getAspectAngle(aspect.type) + aspect.orb,
+    orb: aspect.orb,
+    applying: true,
+    strength: aspect.strength ?? Math.max(0, 1 - aspect.orb / 10),
+  }));
+}
+
+function getAspectAngle(type: string): number {
+  const angles: Record<string, number> = {
+    Conjunction: 0, Opposition: 180, Trine: 120,
+    Square: 90, Sextile: 60, Quincunx: 150,
+    SemiSextile: 30, SemiSquare: 45, Sesquiquadrate: 135, Quintile: 72,
+  };
+  return angles[type] ?? 0;
+}
+
+/**
+ * Chart wheel section with data conversion
+ */
+function ChartWheelSection({ chartData }: { chartData: ChartData }) {
+  const wheelData = useMemo(() => {
+    const planets = convertPlanetsForWheel(chartData.planets);
+    const houses = convertHousesForWheel(chartData.houses);
+    const aspects = convertAspectsForWheel(chartData.aspects);
+
+    return { planets, houses, aspects, ascendant: houses.ascendant };
+  }, [chartData]);
+
+  return (
+    <NatalChartWheel
+      planets={wheelData.planets}
+      houses={wheelData.houses}
+      aspects={wheelData.aspects}
+      ascendant={wheelData.ascendant}
+      size={360}
+    />
+  );
 }
 
 export default function AstrologyResultPage({
@@ -150,6 +271,19 @@ export default function AstrologyResultPage({
                   </span>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Natal Chart Wheel Visualization */}
+          <Card className="bg-slate-900/50 border-purple-500/20 backdrop-blur-sm mb-6">
+            <CardHeader>
+              <CardTitle className="text-xl text-purple-300 flex items-center gap-2">
+                <Sparkles className="w-5 h-5" />
+                Chart Wheel
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex justify-center">
+              <ChartWheelSection chartData={chartData} />
             </CardContent>
           </Card>
 

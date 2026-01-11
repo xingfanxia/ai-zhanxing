@@ -3,24 +3,26 @@
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowLeft, Sparkles, Loader2, RotateCcw } from "lucide-react";
+import { ArrowLeft, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChatInterface } from "@/components/chat/ChatInterface";
+import { TarotCard as TarotCardComponent } from "@/components/tarot";
 
-interface TarotCard {
+interface TarotCardData {
   name: string;
   position: string;
   reversed: boolean;
   meaning: string;
   keywords: string[];
+  suit?: string;
 }
 
 interface ReadingData {
   id: string;
   question?: string;
   spreadType: string;
-  cards: TarotCard[];
+  cards: TarotCardData[];
   interpretation?: string;
 }
 
@@ -145,21 +147,26 @@ export default function TarotResultPage({
           </Card>
 
           {/* Cards Display */}
-          <div className={`grid gap-6 mb-6 ${
+          <div className={`flex flex-wrap justify-center gap-6 mb-6 ${
             readingData.cards.length === 1
-              ? "grid-cols-1 max-w-sm mx-auto"
-              : readingData.cards.length <= 3
-              ? "grid-cols-1 md:grid-cols-3"
-              : "grid-cols-2 md:grid-cols-5"
+              ? "max-w-xs mx-auto"
+              : ""
           }`}>
             {readingData.cards.map((card, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, scale: 0.8, rotateY: 180 }}
-                animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, delay: index * 0.2 }}
+                className="flex flex-col items-center"
               >
-                <TarotCardDisplay card={card} />
+                <TarotCardComponent
+                  name={card.name}
+                  suit={card.suit}
+                  reversed={card.reversed}
+                  size={readingData.cards.length <= 3 ? "lg" : "md"}
+                  position={card.position}
+                />
               </motion.div>
             ))}
           </div>
@@ -258,36 +265,6 @@ export default function TarotResultPage({
             </CardContent>
           </Card>
         </motion.div>
-      </div>
-    </div>
-  );
-}
-
-function TarotCardDisplay({ card }: { card: TarotCard }) {
-  return (
-    <div className="aspect-[2/3] rounded-lg bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-pink-500/30 shadow-lg shadow-pink-500/10 flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      {/* Decorative border */}
-      <div className="absolute inset-2 border border-pink-500/20 rounded-lg pointer-events-none" />
-
-      {/* Reversed indicator */}
-      {card.reversed && (
-        <div className="absolute top-2 right-2">
-          <RotateCcw className="w-4 h-4 text-pink-400" />
-        </div>
-      )}
-
-      {/* Card content */}
-      <div className="text-center z-10">
-        <Sparkles className="w-8 h-8 text-pink-400 mx-auto mb-3" />
-        <h3 className={`font-semibold text-slate-200 ${card.reversed ? "rotate-180" : ""}`}>
-          {card.name}
-        </h3>
-        <p className="text-xs text-slate-500 mt-2">{card.position}</p>
-      </div>
-
-      {/* Background pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0 bg-gradient-to-br from-pink-500 to-purple-500" />
       </div>
     </div>
   );
