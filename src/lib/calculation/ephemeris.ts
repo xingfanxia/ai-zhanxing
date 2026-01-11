@@ -9,6 +9,7 @@
 
 import 'server-only';
 import sweph from 'sweph';
+import path from 'path';
 import {
   Planet,
   PlanetPosition,
@@ -52,14 +53,14 @@ let isInitialized = false;
 /**
  * Initialize the Swiss Ephemeris
  *
- * @param ephePath - Path to ephemeris data files (optional)
+ * @param ephePath - Path to ephemeris data files (optional, defaults to ./ephe)
  */
 export function initEphemeris(ephePath?: string): void {
   if (isInitialized) return;
 
-  if (ephePath) {
-    set_ephe_path(ephePath);
-  }
+  // Default to the ephe folder in the project root
+  const defaultPath = ephePath || path.join(process.cwd(), 'ephe');
+  set_ephe_path(defaultPath);
 
   isInitialized = true;
 }
@@ -142,10 +143,10 @@ export function calculatePlanetPosition(
     planetId = useTrueNode ? constants.SE_TRUE_NODE : constants.SE_MEAN_NODE;
   }
 
-  // Calculate flags: use Moshier ephemeris (built-in, no external files needed) + get speed
-  // Note: Moshier is less accurate but works without external ephemeris files
-  // For production, consider downloading Swiss Ephemeris files for higher accuracy
-  const flags = constants.SEFLG_MOSEPH | constants.SEFLG_SPEED;
+  // Calculate flags: use Swiss Ephemeris (high precision, requires data files) + get speed
+  // Data files: sepl_18.se1, semo_18.se1, seas_18.se1 in ./ephe folder
+  // Precision: ~0.001 arcsecond for planets, ~0.02 arcsecond for asteroids
+  const flags = constants.SEFLG_SWIEPH | constants.SEFLG_SPEED;
 
   // Call Swiss Ephemeris
   const result = calc(jdET, planetId, flags);

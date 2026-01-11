@@ -89,8 +89,8 @@ const DEFAULT_OPTIONS: Required<CalculationOptions> = {
   houseSystem: 'Placidus',
   includeMinorAspects: false,
   customOrbs: {},
-  // Chiron requires Swiss Ephemeris files - disabled by default when using Moshier
-  includeChiron: false,
+  // Chiron is now supported with Swiss Ephemeris data files (seas_18.se1)
+  includeChiron: true,
   useTrueNode: true
 };
 
