@@ -43,29 +43,62 @@ export default function AstrologyPage() {
     setIsLoading(true);
     setError(null);
 
+    // Validate required fields
+    const lat = parseFloat(formData.latitude);
+    const lng = parseFloat(formData.longitude);
+
+    if (!formData.birthDate || !formData.birthTime) {
+      setError("Please enter both birth date and time");
+      setIsLoading(false);
+      return;
+    }
+
+    if (isNaN(lat) || isNaN(lng)) {
+      setError("Please enter valid latitude and longitude coordinates");
+      setIsLoading(false);
+      return;
+    }
+
     try {
+      // Format data for API - API expects birthData wrapper
+      const birthData = {
+        date: formData.birthDate, // Already in YYYY-MM-DD from date input
+        time: formData.birthTime, // Already in HH:MM from time input
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, // Use browser timezone
+        latitude: lat,
+        longitude: lng,
+      };
+
       const response = await fetch("/api/astrology/calculate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          birthDate: formData.birthDate,
-          birthTime: formData.birthTime,
-          location: {
-            city: formData.city,
-            latitude: parseFloat(formData.latitude) || null,
-            longitude: parseFloat(formData.longitude) || null,
+          birthData,
+          options: {
+            houseSystem: formData.houseSystem.charAt(0).toUpperCase() + formData.houseSystem.slice(1),
           },
-          houseSystem: formData.houseSystem,
         }),
       });
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || "Failed to calculate chart");
+        throw new Error(data.message || data.error || "Failed to calculate chart");
       }
 
       const result = await response.json();
-      router.push(`/astrology/${result.id}`);
+
+      // Store result in sessionStorage and navigate with temp ID
+      const tempId = `temp_${Date.now()}`;
+      const chartData = {
+        ...result.data,
+        birthData,
+        city: formData.city,
+        houseSystem: formData.houseSystem,
+        createdAt: new Date().toISOString(),
+      };
+      sessionStorage.setItem(`astrology_reading_${tempId}`, JSON.stringify(chartData));
+
+      router.push(`/astrology/${tempId}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {

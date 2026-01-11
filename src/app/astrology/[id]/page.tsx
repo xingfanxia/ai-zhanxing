@@ -177,17 +177,57 @@ export default function AstrologyResultPage({
           if (resultData?.interpretation) {
             setInterpretation(resultData.interpretation);
           }
+        } else if (resolvedParams.id.startsWith("temp_")) {
+          // Load from sessionStorage for temporary readings
+          const storedData = sessionStorage.getItem(`astrology_reading_${resolvedParams.id}`);
+
+          if (!storedData) {
+            throw new Error("Chart not found. It may have expired.");
+          }
+
+          const data = JSON.parse(storedData);
+
+          // Transform API response format to ChartData format
+          const transformedChart: ChartData = {
+            id: resolvedParams.id,
+            birthDate: data.birthData?.date || "",
+            birthTime: data.birthData?.time || "",
+            location: {
+              city: data.city,
+              latitude: data.birthData?.latitude,
+              longitude: data.birthData?.longitude,
+            },
+            planets: Object.entries(data.planets || {}).map(([name, pos]) => {
+              const p = pos as Record<string, unknown>;
+              return {
+                name,
+                sign: (p.sign as string) || "",
+                degree: (p.degreeInSign as number) || 0,
+                house: 1,
+                retrograde: (p.retrograde as boolean) || false,
+              };
+            }),
+            houses: (data.houses?.cusps || []).map((cusp: number, index: number) => {
+              const signIndex = Math.floor(cusp / 30);
+              const signs = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"];
+              return {
+                number: index + 1,
+                sign: signs[signIndex] || "Aries",
+                degree: cusp % 30,
+              };
+            }),
+            aspects: (data.aspects || []).map((aspect: Record<string, unknown>) => ({
+              planet1: aspect.planet1 as string,
+              planet2: aspect.planet2 as string,
+              type: aspect.type as string,
+              orb: aspect.orb as number,
+              strength: aspect.strength as number,
+            })),
+          };
+
+          setChartData(transformedChart);
         } else {
-          // Load from temporary storage (existing flow)
-          const response = await fetch(`/api/astrology/${resolvedParams.id}`);
-          if (!response.ok) {
-            throw new Error("Chart not found");
-          }
-          const data = await response.json();
-          setChartData(data);
-          if (data.interpretation) {
-            setInterpretation(data.interpretation);
-          }
+          throw new Error("Invalid chart ID");
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load chart");
