@@ -440,7 +440,5 @@ function getSpreadLabel(spreadType: string): string {
 /**
  * Check if a string is a valid UUID
  */
-export function isValidUUID(str: string): boolean {
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  return uuidRegex.test(str);
-}
+// Re-export from validation utils for backwards compatibility
+export { isValidUUID } from '@/lib/utils/validation';

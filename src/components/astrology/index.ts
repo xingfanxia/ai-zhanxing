@@ -4,6 +4,8 @@
  */
 
 export { NatalChartWheel, default } from "./NatalChartWheel";
+export { ZodiacRing } from "./ZodiacRing";
+export { HouseWheel } from "./HouseWheel";
 export {
   ZodiacSymbol,
   ZODIAC_SYMBOLS,
@@ -32,3 +34,11 @@ export {
   getAspectColor,
   isMajorAspect,
 } from "./AspectLine";
+export {
+  CHART_CONFIG,
+  longitudeToAngle,
+  polarToCartesian,
+  describeArc,
+  createSegmentPath,
+  calculatePlanetPositions,
+} from "./chart-utils";
