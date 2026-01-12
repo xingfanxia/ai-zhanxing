@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useRouter } from "@/i18n/routing";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -17,11 +16,16 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Reading } from "@/lib/services/readings";
+import { useTranslations } from "next-intl";
 
 type FilterType = "all" | "astrology" | "tarot";
 
 export default function ReadingsPage() {
   const router = useRouter();
+  const t = useTranslations("Readings");
+  const tNav = useTranslations("Navigation");
+  const tCommon = useTranslations("Common");
+  const tSpreads = useTranslations("Spreads");
   const [readings, setReadings] = useState<Reading[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -145,13 +149,15 @@ export default function ReadingsPage() {
   const getSpreadLabel = (spreadType: string): string => {
     switch (spreadType) {
       case "single":
-        return "Single Card";
+        return tSpreads("single.name");
       case "three-card":
-        return "Three Card Spread";
+      case "three_card":
+        return tSpreads("threeCard.name");
       case "celtic-cross":
-        return "Celtic Cross";
+      case "celtic_cross":
+        return tSpreads("celticCross.name");
       default:
-        return spreadType || "Tarot Reading";
+        return spreadType || t("title");
     }
   };
 
@@ -169,7 +175,7 @@ export default function ReadingsPage() {
             className="inline-flex items-center text-slate-400 hover:text-slate-200 mb-8"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Home
+            {tNav("backToHome")}
           </Link>
 
           <Card className="bg-slate-900/50 border-indigo-500/20 backdrop-blur-sm">
@@ -177,7 +183,7 @@ export default function ReadingsPage() {
               <CardTitle className="text-2xl text-indigo-300 flex items-center justify-between">
                 <span className="flex items-center gap-2">
                   <Star className="w-6 h-6" />
-                  My Saved Readings
+                  {t("title")}
                 </span>
                 <span className="text-sm text-slate-400 font-normal">
                   {filteredReadings.length} reading
@@ -194,7 +200,7 @@ export default function ReadingsPage() {
                   className="flex items-center gap-1"
                 >
                   <Filter className="w-3 h-3" />
-                  All
+                  {t("filters.all")}
                 </Button>
                 <Button
                   variant={filter === "astrology" ? "mystical" : "mystical-outline"}
@@ -203,7 +209,7 @@ export default function ReadingsPage() {
                   className="flex items-center gap-1"
                 >
                   <Star className="w-3 h-3" />
-                  Astrology
+                  {t("filters.astrology")}
                 </Button>
                 <Button
                   variant={filter === "tarot" ? "mystical" : "mystical-outline"}
@@ -212,7 +218,7 @@ export default function ReadingsPage() {
                   className="flex items-center gap-1"
                 >
                   <Moon className="w-3 h-3" />
-                  Tarot
+                  {t("filters.tarot")}
                 </Button>
               </div>
             </CardHeader>
@@ -226,27 +232,27 @@ export default function ReadingsPage() {
                 <div className="text-center py-12">
                   <p className="text-slate-400 mb-4">{error}</p>
                   <Link href="/auth/login">
-                    <Button variant="mystical">Sign In</Button>
+                    <Button variant="mystical">{tCommon("signIn")}</Button>
                   </Link>
                 </div>
               ) : filteredReadings.length === 0 ? (
                 <div className="text-center py-12">
                   <p className="text-slate-400 mb-4">
                     {filter === "all"
-                      ? "No saved readings yet. Start by creating an astrology chart or tarot reading!"
-                      : `No ${filter} readings yet.`}
+                      ? t("empty.description")
+                      : t("empty.description")}
                   </p>
                   <div className="flex gap-4 justify-center">
                     <Link href="/astrology">
                       <Button variant="mystical-outline">
                         <Star className="w-4 h-4 mr-2" />
-                        Calculate Chart
+                        {t("filters.astrology")}
                       </Button>
                     </Link>
                     <Link href="/tarot">
                       <Button variant="mystical-outline">
                         <Moon className="w-4 h-4 mr-2" />
-                        Draw Cards
+                        {t("filters.tarot")}
                       </Button>
                     </Link>
                   </div>

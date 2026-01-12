@@ -1,26 +1,31 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useRouter } from "@/i18n/routing";
+import { Link } from "@/i18n/routing";
 import { motion } from "framer-motion";
 import { ArrowLeft, Calendar, Clock, MapPin, Settings, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { CitySearch, type CityResult } from "@/components/CitySearch";
+import { LocaleSwitcher } from "@/components/LocaleSwitcher";
+import { useTranslations } from "next-intl";
 
-const houseSystems = [
-  { value: "placidus", label: "Placidus (Default)" },
-  { value: "koch", label: "Koch" },
-  { value: "whole-sign", label: "Whole Sign" },
-  { value: "equal", label: "Equal House" },
-  { value: "campanus", label: "Campanus" },
-  { value: "regiomontanus", label: "Regiomontanus" },
+const houseSystemKeys = [
+  { value: "placidus", key: "placidus" },
+  { value: "koch", key: "koch" },
+  { value: "whole-sign", key: "wholeSign" },
+  { value: "equal", key: "equal" },
+  { value: "campanus", key: "campanus" },
+  { value: "regiomontanus", key: "regiomontanus" },
 ];
 
 export default function AstrologyPage() {
   const router = useRouter();
+  const t = useTranslations("Astrology");
+  const tNav = useTranslations("Navigation");
+  const tHouse = useTranslations("HouseSystems");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -120,7 +125,12 @@ export default function AstrologyPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-purple-950/20 to-slate-950 py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-purple-950/20 to-slate-950 py-12 px-4 relative">
+      {/* Language Switcher - Fixed top right */}
+      <div className="absolute top-4 right-4 z-50">
+        <LocaleSwitcher />
+      </div>
+
       <div className="container mx-auto max-w-2xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -130,16 +140,16 @@ export default function AstrologyPage() {
           {/* Back button */}
           <Link href="/" className="inline-flex items-center text-slate-400 hover:text-slate-200 mb-8">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Home
+            {tNav("backToHome")}
           </Link>
 
           <Card className="bg-slate-900/50 border-purple-500/20 backdrop-blur-sm">
             <CardHeader className="text-center">
               <CardTitle className="text-3xl text-purple-300">
-                Calculate Your Natal Chart
+                {t("title")}
               </CardTitle>
               <CardDescription className="text-slate-400">
-                Enter your birth information to generate your astrological chart
+                {t("description")}
               </CardDescription>
             </CardHeader>
 
@@ -149,7 +159,7 @@ export default function AstrologyPage() {
                 <div className="space-y-2">
                   <label className="flex items-center text-sm font-medium text-slate-200">
                     <Calendar className="w-4 h-4 mr-2 text-purple-400" />
-                    Birth Date
+                    {t("form.birthDate")}
                   </label>
                   <Input
                     type="date"
@@ -165,7 +175,7 @@ export default function AstrologyPage() {
                 <div className="space-y-2">
                   <label className="flex items-center text-sm font-medium text-slate-200">
                     <Clock className="w-4 h-4 mr-2 text-purple-400" />
-                    Birth Time
+                    {t("form.birthTime")}
                   </label>
                   <Input
                     type="time"
@@ -176,7 +186,7 @@ export default function AstrologyPage() {
                     className="bg-slate-800/50 border-slate-700 text-slate-100"
                   />
                   <p className="text-xs text-slate-500">
-                    Enter your local birth time. If unknown, use 12:00.
+                    {t("form.birthTimeUnknown")}
                   </p>
                 </div>
 
@@ -184,33 +194,33 @@ export default function AstrologyPage() {
                 <div className="space-y-4">
                   <label className="flex items-center text-sm font-medium text-slate-200">
                     <MapPin className="w-4 h-4 mr-2 text-purple-400" />
-                    Birth Location
+                    {t("form.birthPlace")}
                   </label>
                   <CitySearch
                     value={formData.city}
                     onSelect={handleCitySelect}
-                    placeholder="Search for a city (e.g., New York, Tokyo, London)"
+                    placeholder={t("form.birthPlacePlaceholder")}
                   />
 
                   {/* Show coordinates when filled */}
                   {formData.latitude && formData.longitude && (
                     <div className="p-3 rounded-lg bg-purple-500/10 border border-purple-500/20">
                       <p className="text-xs text-purple-300 mb-2">
-                        Coordinates auto-filled from city selection:
+                        {t("form.latitude")}/{t("form.longitude")}:
                       </p>
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
-                          <span className="text-slate-400">Lat:</span>{" "}
+                          <span className="text-slate-400">{t("form.latitude")}:</span>{" "}
                           <span className="text-slate-200">{formData.latitude}</span>
                         </div>
                         <div>
-                          <span className="text-slate-400">Lng:</span>{" "}
+                          <span className="text-slate-400">{t("form.longitude")}:</span>{" "}
                           <span className="text-slate-200">{formData.longitude}</span>
                         </div>
                       </div>
                       {formData.timezone && (
                         <div className="mt-1 text-xs text-slate-400">
-                          Timezone: {formData.timezone}
+                          {t("form.timezone")}: {formData.timezone}
                         </div>
                       )}
                     </div>
@@ -219,7 +229,7 @@ export default function AstrologyPage() {
                   {/* Manual coordinate entry (collapsible) */}
                   <details className="text-sm">
                     <summary className="text-slate-400 cursor-pointer hover:text-slate-300">
-                      Or enter coordinates manually
+                      {t("form.latitude")}/{t("form.longitude")}
                     </summary>
                     <div className="grid grid-cols-2 gap-4 mt-3">
                       <div>
@@ -228,7 +238,7 @@ export default function AstrologyPage() {
                           name="latitude"
                           value={formData.latitude}
                           onChange={handleInputChange}
-                          placeholder="Latitude (e.g., 40.7128)"
+                          placeholder={t("form.latitude")}
                           step="0.0001"
                           className="bg-slate-800/50 border-slate-700 text-slate-100 placeholder:text-slate-500"
                         />
@@ -239,7 +249,7 @@ export default function AstrologyPage() {
                           name="longitude"
                           value={formData.longitude}
                           onChange={handleInputChange}
-                          placeholder="Longitude (e.g., -74.0060)"
+                          placeholder={t("form.longitude")}
                           step="0.0001"
                           className="bg-slate-800/50 border-slate-700 text-slate-100 placeholder:text-slate-500"
                         />
@@ -252,7 +262,7 @@ export default function AstrologyPage() {
                 <div className="space-y-2">
                   <label className="flex items-center text-sm font-medium text-slate-200">
                     <Settings className="w-4 h-4 mr-2 text-purple-400" />
-                    House System
+                    {t("form.houseSystem")}
                   </label>
                   <select
                     name="houseSystem"
@@ -260,9 +270,9 @@ export default function AstrologyPage() {
                     onChange={handleInputChange}
                     className="w-full h-10 px-3 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-500/30"
                   >
-                    {houseSystems.map((system) => (
+                    {houseSystemKeys.map((system) => (
                       <option key={system.value} value={system.value}>
-                        {system.label}
+                        {tHouse(`${system.key}.name`)}
                       </option>
                     ))}
                   </select>
@@ -286,10 +296,10 @@ export default function AstrologyPage() {
                   {isLoading ? (
                     <>
                       <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      Calculating...
+                      {t("buttons.calculating")}
                     </>
                   ) : (
-                    "Calculate Chart"
+                    t("buttons.calculate")
                   )}
                 </Button>
               </form>

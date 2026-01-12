@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { motion } from "framer-motion";
 import { ArrowLeft, Sparkles, Loader2, Save, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChatInterface } from "@/components/chat/ChatInterface";
 import { TarotCard as TarotCardComponent } from "@/components/tarot";
 import { isValidUUID } from "@/lib/utils/validation";
+import { useTranslations } from "next-intl";
 
 interface TarotCardData {
   name: string;
@@ -50,6 +51,11 @@ export default function TarotResultPage({
   params: Promise<{ id: string }>;
 }) {
   const resolvedParams = use(params);
+  const t = useTranslations("TarotResult");
+  const tNav = useTranslations("Navigation");
+  const tCommon = useTranslations("Common");
+  const tSpreads = useTranslations("Spreads");
+  const tChat = useTranslations("Chat");
   const [readingData, setReadingData] = useState<ReadingData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isInterpretationLoading, setIsInterpretationLoading] = useState(false);
@@ -292,11 +298,13 @@ export default function TarotResultPage({
   const getSpreadLabel = (type: string) => {
     switch (type) {
       case "single":
-        return "Single Card";
+        return tSpreads("single.name");
       case "three-card":
-        return "Three Card Spread";
+      case "three_card":
+        return tSpreads("threeCard.name");
       case "celtic-cross":
-        return "Celtic Cross";
+      case "celtic_cross":
+        return tSpreads("celticCross.name");
       default:
         return type;
     }
@@ -317,14 +325,14 @@ export default function TarotResultPage({
               className="inline-flex items-center text-slate-400 hover:text-slate-200"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              New Reading
+              {tNav("newReading")}
             </Link>
             <Link
               href="/readings"
               className="inline-flex items-center text-slate-400 hover:text-slate-200"
             >
               <BookOpen className="w-4 h-4 mr-2" />
-              My Readings
+              {tNav("readings")}
             </Link>
           </div>
 
@@ -336,7 +344,7 @@ export default function TarotResultPage({
                 {getSpreadLabel(readingData.spreadType)}
                 {savedReadingId && (
                   <span className="text-xs bg-pink-500/20 px-2 py-1 rounded text-pink-300 ml-2">
-                    Saved
+                    {tCommon("save")}
                   </span>
                 )}
               </CardTitle>
@@ -378,7 +386,7 @@ export default function TarotResultPage({
           {/* Card Meanings */}
           <Card className="bg-slate-900/50 border-pink-500/20 backdrop-blur-sm mb-6">
             <CardHeader>
-              <CardTitle className="text-xl text-pink-300">Card Meanings</CardTitle>
+              <CardTitle className="text-xl text-pink-300">{t("sections.meanings")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {readingData.cards.map((card, index) => (
@@ -390,7 +398,7 @@ export default function TarotResultPage({
                     <h3 className="font-semibold text-pink-300">
                       {card.name}
                       {card.reversed && (
-                        <span className="ml-2 text-xs text-slate-400">(Reversed)</span>
+                        <span className="ml-2 text-xs text-slate-400">({t("cardInfo.reversed")})</span>
                       )}
                     </h3>
                     <span className="text-xs text-slate-500">{card.position}</span>
@@ -417,7 +425,7 @@ export default function TarotResultPage({
               <CardTitle className="text-xl text-pink-300 flex items-center justify-between">
                 <span className="flex items-center gap-2">
                   <Sparkles className="w-5 h-5" />
-                  AI Interpretation
+                  {t("interpretation.overallMessage")}
                 </span>
                 {interpretation && (
                   <Button
@@ -430,17 +438,17 @@ export default function TarotResultPage({
                     {isSaving ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Saving...
+                        {tCommon("loading")}
                       </>
                     ) : savedReadingId ? (
                       <>
                         <Save className="w-4 h-4 mr-2" />
-                        Update
+                        {tCommon("edit")}
                       </>
                     ) : (
                       <>
                         <Save className="w-4 h-4 mr-2" />
-                        Save
+                        {tCommon("save")}
                       </>
                     )}
                   </Button>
@@ -455,7 +463,7 @@ export default function TarotResultPage({
               ) : (
                 <div className="text-center py-4">
                   <p className="text-slate-400 mb-4">
-                    Get a personalized AI interpretation of your tarot reading
+                    {t("interpretation.generating")}
                   </p>
                   <Button
                     variant="mystical"
@@ -466,12 +474,12 @@ export default function TarotResultPage({
                     {isInterpretationLoading ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Interpreting...
+                        {t("interpretation.generating")}
                       </>
                     ) : (
                       <>
                         <Sparkles className="w-4 h-4 mr-2" />
-                        Get AI Interpretation
+                        {t("interpretation.overallMessage")}
                       </>
                     )}
                   </Button>
@@ -484,7 +492,7 @@ export default function TarotResultPage({
           <Card className="bg-slate-900/50 border-pink-500/20 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="text-xl text-pink-300">
-                Ask Questions
+                {tChat("title")}
               </CardTitle>
             </CardHeader>
             <CardContent>

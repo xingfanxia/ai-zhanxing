@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, use, useMemo } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { motion } from "framer-motion";
 import { ArrowLeft, Sparkles, Loader2, Sun, Moon, Save, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChatInterface } from "@/components/chat/ChatInterface";
 import { NatalChartWheel } from "@/components/astrology";
 import { isValidUUID } from "@/lib/utils/validation";
+import { useTranslations } from "next-intl";
 import type {
   Planet as PlanetType,
   PlanetPosition,
@@ -138,6 +139,10 @@ export default function AstrologyResultPage({
   params: Promise<{ id: string }>;
 }) {
   const resolvedParams = use(params);
+  const t = useTranslations("AstrologyResult");
+  const tNav = useTranslations("Navigation");
+  const tCommon = useTranslations("Common");
+  const tChat = useTranslations("Chat");
   const [chartData, setChartData] = useState<ChartData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isInterpretationLoading, setIsInterpretationLoading] = useState(false);
@@ -426,14 +431,14 @@ export default function AstrologyResultPage({
               className="inline-flex items-center text-slate-400 hover:text-slate-200"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              New Calculation
+              {tNav("newReading")}
             </Link>
             <Link
               href="/readings"
               className="inline-flex items-center text-slate-400 hover:text-slate-200"
             >
               <BookOpen className="w-4 h-4 mr-2" />
-              My Readings
+              {tNav("readings")}
             </Link>
           </div>
 
@@ -442,10 +447,10 @@ export default function AstrologyResultPage({
             <CardHeader>
               <CardTitle className="text-xl text-purple-300 flex items-center gap-2">
                 <Sun className="w-5 h-5" />
-                Natal Chart
+                {t("title")}
                 {savedReadingId && (
                   <span className="text-xs bg-purple-500/20 px-2 py-1 rounded text-purple-300 ml-2">
-                    Saved
+                    {tCommon("save")}
                   </span>
                 )}
               </CardTitle>
@@ -476,7 +481,7 @@ export default function AstrologyResultPage({
             <CardHeader>
               <CardTitle className="text-xl text-purple-300 flex items-center gap-2">
                 <Sparkles className="w-5 h-5" />
-                Chart Wheel
+                {t("sections.chartWheel")}
               </CardTitle>
             </CardHeader>
             <CardContent className="flex justify-center">
@@ -489,7 +494,7 @@ export default function AstrologyResultPage({
             <CardHeader>
               <CardTitle className="text-xl text-purple-300 flex items-center gap-2">
                 <Moon className="w-5 h-5" />
-                Planet Positions
+                {t("sections.planetaryPositions")}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -497,10 +502,10 @@ export default function AstrologyResultPage({
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-slate-700/50">
-                      <th className="text-left py-2 text-slate-400 font-medium">Planet</th>
-                      <th className="text-left py-2 text-slate-400 font-medium">Sign</th>
-                      <th className="text-left py-2 text-slate-400 font-medium">Degree</th>
-                      <th className="text-left py-2 text-slate-400 font-medium">House</th>
+                      <th className="text-left py-2 text-slate-400 font-medium">{t("planetInfo.sign")}</th>
+                      <th className="text-left py-2 text-slate-400 font-medium">{t("planetInfo.sign")}</th>
+                      <th className="text-left py-2 text-slate-400 font-medium">{t("planetInfo.degree")}</th>
+                      <th className="text-left py-2 text-slate-400 font-medium">{t("planetInfo.house")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -528,7 +533,7 @@ export default function AstrologyResultPage({
             <CardHeader>
               <CardTitle className="text-xl text-purple-300 flex items-center gap-2">
                 <Sparkles className="w-5 h-5" />
-                Aspects
+                {t("sections.aspects")}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -556,7 +561,7 @@ export default function AstrologyResultPage({
               <CardTitle className="text-xl text-purple-300 flex items-center justify-between">
                 <span className="flex items-center gap-2">
                   <Sparkles className="w-5 h-5" />
-                  AI Interpretation
+                  {t("sections.interpretation")}
                 </span>
                 {interpretation && (
                   <Button
@@ -568,17 +573,17 @@ export default function AstrologyResultPage({
                     {isSaving ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Saving...
+                        {tCommon("loading")}
                       </>
                     ) : savedReadingId ? (
                       <>
                         <Save className="w-4 h-4 mr-2" />
-                        Update
+                        {tCommon("edit")}
                       </>
                     ) : (
                       <>
                         <Save className="w-4 h-4 mr-2" />
-                        Save
+                        {tCommon("save")}
                       </>
                     )}
                   </Button>
@@ -593,7 +598,7 @@ export default function AstrologyResultPage({
               ) : (
                 <div className="text-center py-4">
                   <p className="text-slate-400 mb-4">
-                    Get a personalized AI interpretation of your natal chart
+                    {t("interpretation.generating")}
                   </p>
                   <Button
                     variant="mystical"
@@ -603,12 +608,12 @@ export default function AstrologyResultPage({
                     {isInterpretationLoading ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Analyzing...
+                        {t("interpretation.generating")}
                       </>
                     ) : (
                       <>
                         <Sparkles className="w-4 h-4 mr-2" />
-                        Get AI Interpretation
+                        {t("sections.interpretation")}
                       </>
                     )}
                   </Button>
@@ -620,7 +625,7 @@ export default function AstrologyResultPage({
           {/* Chat Interface */}
           <Card className="bg-slate-900/50 border-purple-500/20 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="text-xl text-purple-300">Ask Questions</CardTitle>
+              <CardTitle className="text-xl text-purple-300">{tChat("title")}</CardTitle>
             </CardHeader>
             <CardContent>
               <ChatInterface

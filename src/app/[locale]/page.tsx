@@ -1,11 +1,13 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { motion } from "framer-motion";
 import { Sparkles, Moon, Sun, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LocaleSwitcher } from "@/components/LocaleSwitcher";
+import { useTranslations } from "next-intl";
 
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },
@@ -13,8 +15,15 @@ const fadeIn = {
 };
 
 export default function HomePage() {
+  const t = useTranslations("Home");
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-purple-950/20 to-slate-950">
+      {/* Language Switcher - Fixed top right */}
+      <div className="absolute top-4 right-4 z-50">
+        <LocaleSwitcher />
+      </div>
+
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         {/* Background stars effect */}
@@ -44,13 +53,12 @@ export default function HomePage() {
             <div className="flex items-center justify-center gap-3 mb-6">
               <Sparkles className="w-10 h-10 text-purple-400" />
               <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent">
-                AI 占星
+                {t("title")}
               </h1>
               <Moon className="w-10 h-10 text-indigo-400" />
             </div>
             <p className="text-xl text-slate-300 max-w-2xl mx-auto mb-8">
-              Discover the wisdom of the stars and the mysteries of tarot through AI-powered insights.
-              Explore your cosmic blueprint and divine guidance.
+              {t("description")}
             </p>
           </motion.div>
 
@@ -69,14 +77,14 @@ export default function HomePage() {
                   className="text-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white"
                 >
                   <Sun className="w-5 h-5 mr-2" />
-                  Astrology
+                  {t("astrologyTab.title")}
                 </TabsTrigger>
                 <TabsTrigger
                   value="tarot"
                   className="text-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-600 data-[state=active]:to-purple-600 data-[state=active]:text-white"
                 >
                   <Star className="w-5 h-5 mr-2" />
-                  Tarot
+                  {t("tarotTab.title")}
                 </TabsTrigger>
               </TabsList>
 
@@ -84,34 +92,34 @@ export default function HomePage() {
                 <Card className="bg-slate-900/50 border-purple-500/20 backdrop-blur-sm">
                   <CardHeader className="text-center">
                     <CardTitle className="text-3xl text-purple-300">
-                      Western Astrology
+                      {t("astrologyTab.title")}
                     </CardTitle>
                     <CardDescription className="text-slate-400 text-lg">
-                      Calculate your natal chart and receive personalized AI interpretations
+                      {t("astrologyTab.description")}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div className="grid md:grid-cols-3 gap-4">
                       <FeatureItem
                         icon={<Sun className="w-6 h-6 text-yellow-400" />}
-                        title="Natal Chart"
-                        description="Calculate planet positions, houses, and aspects based on your birth data"
+                        title={t("astrologyTab.title")}
+                        description={t("astrologyTab.description")}
                       />
                       <FeatureItem
                         icon={<Moon className="w-6 h-6 text-blue-400" />}
-                        title="AI Interpretation"
-                        description="Get personalized readings powered by advanced AI understanding"
+                        title={t("astrologyTab.title")}
+                        description={t("astrologyTab.description")}
                       />
                       <FeatureItem
                         icon={<Sparkles className="w-6 h-6 text-purple-400" />}
-                        title="Chat Follow-up"
-                        description="Ask questions and dive deeper into your chart analysis"
+                        title={t("astrologyTab.title")}
+                        description={t("astrologyTab.description")}
                       />
                     </div>
                     <div className="text-center pt-4">
                       <Link href="/astrology">
                         <Button variant="mystical" size="xl">
-                          Calculate Your Chart
+                          {t("getStarted")}
                         </Button>
                       </Link>
                     </div>
@@ -123,34 +131,34 @@ export default function HomePage() {
                 <Card className="bg-slate-900/50 border-pink-500/20 backdrop-blur-sm">
                   <CardHeader className="text-center">
                     <CardTitle className="text-3xl text-pink-300">
-                      Tarot Reading
+                      {t("tarotTab.title")}
                     </CardTitle>
                     <CardDescription className="text-slate-400 text-lg">
-                      Draw cards and receive intuitive AI-powered interpretations
+                      {t("tarotTab.description")}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div className="grid md:grid-cols-3 gap-4">
                       <FeatureItem
                         icon={<Star className="w-6 h-6 text-pink-400" />}
-                        title="Multiple Spreads"
-                        description="Choose from Single Card, Three Card, or Celtic Cross spreads"
+                        title={t("tarotTab.title")}
+                        description={t("tarotTab.description")}
                       />
                       <FeatureItem
                         icon={<Sparkles className="w-6 h-6 text-yellow-400" />}
-                        title="AI Guidance"
-                        description="Receive detailed interpretations tailored to your question"
+                        title={t("tarotTab.title")}
+                        description={t("tarotTab.description")}
                       />
                       <FeatureItem
                         icon={<Moon className="w-6 h-6 text-indigo-400" />}
-                        title="Deep Insights"
-                        description="Explore card meanings and ask follow-up questions"
+                        title={t("tarotTab.title")}
+                        description={t("tarotTab.description")}
                       />
                     </div>
                     <div className="text-center pt-4">
                       <Link href="/tarot">
                         <Button variant="mystical" size="xl" className="from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700">
-                          Draw Your Cards
+                          {t("getStarted")}
                         </Button>
                       </Link>
                     </div>

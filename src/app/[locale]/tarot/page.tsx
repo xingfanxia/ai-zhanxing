@@ -1,37 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useRouter } from "@/i18n/routing";
+import { Link } from "@/i18n/routing";
 import { motion } from "framer-motion";
 import { ArrowLeft, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useTranslations } from "next-intl";
 
-const spreadTypes = [
-  {
-    value: "single",
-    label: "Single Card",
-    description: "A quick answer or daily guidance",
-    cards: 1,
-  },
-  {
-    value: "three_card",
-    label: "Three Card Spread",
-    description: "Past, Present, Future or Situation, Action, Outcome",
-    cards: 3,
-  },
-  {
-    value: "celtic_cross",
-    label: "Celtic Cross",
-    description: "Comprehensive 10-card reading for deep insight",
-    cards: 10,
-  },
+const spreadTypeKeys = [
+  { value: "single", key: "single", cards: 1 },
+  { value: "three_card", key: "threeCard", cards: 3 },
+  { value: "celtic_cross", key: "celticCross", cards: 10 },
 ];
 
 export default function TarotPage() {
   const router = useRouter();
+  const t = useTranslations("Tarot");
+  const tNav = useTranslations("Navigation");
+  const tSpreads = useTranslations("Spreads");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -89,16 +78,16 @@ export default function TarotPage() {
           {/* Back button */}
           <Link href="/" className="inline-flex items-center text-slate-400 hover:text-slate-200 mb-8">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Home
+            {tNav("backToHome")}
           </Link>
 
           <Card className="bg-slate-900/50 border-pink-500/20 backdrop-blur-sm">
             <CardHeader className="text-center">
               <CardTitle className="text-3xl text-pink-300">
-                Tarot Reading
+                {t("title")}
               </CardTitle>
               <CardDescription className="text-slate-400">
-                Focus your intention and draw your cards
+                {t("description")}
               </CardDescription>
             </CardHeader>
 
@@ -108,32 +97,34 @@ export default function TarotPage() {
                 <div className="space-y-2">
                   <label className="flex items-center text-sm font-medium text-slate-200">
                     <Sparkles className="w-4 h-4 mr-2 text-pink-400" />
-                    Your Question (Optional)
+                    {t("form.question")}
                   </label>
                   <Input
                     type="text"
                     value={question}
                     onChange={(e) => setQuestion(e.target.value)}
-                    placeholder="What guidance do you seek?"
+                    placeholder={t("form.questionPlaceholder")}
                     className="bg-slate-800/50 border-slate-700 text-slate-100 placeholder:text-slate-500"
                   />
                   <p className="text-xs text-slate-500">
-                    You may leave this blank for a general reading
+                    {t("form.questionDescription")}
                   </p>
                 </div>
 
                 {/* Spread Type Selection */}
                 <div className="space-y-4">
                   <label className="text-sm font-medium text-slate-200">
-                    Choose Your Spread
+                    {t("form.spread")}
                   </label>
                   <div className="grid gap-4">
-                    {spreadTypes.map((spread) => (
+                    {spreadTypeKeys.map((spread) => (
                       <SpreadOption
                         key={spread.value}
-                        spread={spread}
+                        spreadKey={spread.key}
+                        cards={spread.cards}
                         isSelected={selectedSpread === spread.value}
                         onSelect={() => setSelectedSpread(spread.value)}
+                        tSpreads={tSpreads}
                       />
                     ))}
                   </div>
@@ -157,10 +148,10 @@ export default function TarotPage() {
                   {isLoading ? (
                     <>
                       <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      Drawing Cards...
+                      {t("buttons.drawing")}
                     </>
                   ) : (
-                    "Draw Cards"
+                    t("buttons.draw")
                   )}
                 </Button>
               </form>
@@ -173,13 +164,17 @@ export default function TarotPage() {
 }
 
 function SpreadOption({
-  spread,
+  spreadKey,
+  cards,
   isSelected,
   onSelect,
+  tSpreads,
 }: {
-  spread: (typeof spreadTypes)[number];
+  spreadKey: string;
+  cards: number;
   isSelected: boolean;
   onSelect: () => void;
+  tSpreads: ReturnType<typeof useTranslations<"Spreads">>;
 }) {
   return (
     <button
@@ -193,13 +188,13 @@ function SpreadOption({
     >
       <div className="flex items-center justify-between mb-2">
         <span className={`font-medium ${isSelected ? "text-pink-300" : "text-slate-200"}`}>
-          {spread.label}
+          {tSpreads(`${spreadKey}.name`)}
         </span>
         <span className="text-xs text-slate-500">
-          {spread.cards} {spread.cards === 1 ? "card" : "cards"}
+          {cards} {cards === 1 ? "card" : "cards"}
         </span>
       </div>
-      <p className="text-sm text-slate-400">{spread.description}</p>
+      <p className="text-sm text-slate-400">{tSpreads(`${spreadKey}.description`)}</p>
     </button>
   );
 }

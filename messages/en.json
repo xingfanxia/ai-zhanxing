@@ -1,0 +1,343 @@
+{
+  "Common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "save": "Save",
+    "cancel": "Cancel",
+    "back": "Back",
+    "submit": "Submit",
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "continue": "Continue",
+    "close": "Close",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "share": "Share",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "yes": "Yes",
+    "no": "No",
+    "confirm": "Confirm",
+    "reset": "Reset"
+  },
+  "Navigation": {
+    "home": "Home",
+    "astrology": "Astrology",
+    "tarot": "Tarot",
+    "readings": "My Readings",
+    "backToHome": "Back to Home",
+    "newReading": "New Reading",
+    "profile": "Profile",
+    "settings": "Settings"
+  },
+  "Home": {
+    "title": "AI Zhanxing",
+    "subtitle": "Unveil the Mysteries of Your Cosmic Journey",
+    "description": "Explore ancient wisdom through modern AI. Discover your birth chart secrets and receive intuitive tarot guidance.",
+    "astrologyTab": {
+      "title": "Astrology",
+      "description": "Calculate your natal chart and explore planetary alignments that shape your destiny."
+    },
+    "tarotTab": {
+      "title": "Tarot",
+      "description": "Draw cards and receive AI-powered interpretations for guidance and insight."
+    },
+    "readingsTab": {
+      "title": "Past Readings",
+      "description": "Review your saved readings and track your spiritual journey over time."
+    },
+    "getStarted": "Get Started",
+    "learnMore": "Learn More"
+  },
+  "Astrology": {
+    "title": "Birth Chart Calculator",
+    "subtitle": "Discover the celestial blueprint of your soul",
+    "description": "Enter your birth details to generate a personalized natal chart with AI-powered interpretations.",
+    "form": {
+      "birthDate": "Birth Date",
+      "birthDatePlaceholder": "Select your birth date",
+      "birthTime": "Birth Time",
+      "birthTimePlaceholder": "Enter your birth time",
+      "birthTimeUnknown": "I don't know my birth time",
+      "birthPlace": "Birth Place",
+      "birthPlacePlaceholder": "Enter city or location",
+      "latitude": "Latitude",
+      "longitude": "Longitude",
+      "timezone": "Timezone",
+      "houseSystem": "House System",
+      "houseSystemDescription": "Choose the house calculation method for your chart"
+    },
+    "buttons": {
+      "calculate": "Calculate Chart",
+      "calculating": "Calculating your cosmic blueprint...",
+      "recalculate": "Recalculate",
+      "saveReading": "Save This Reading",
+      "shareChart": "Share Chart"
+    },
+    "validation": {
+      "birthDateRequired": "Birth date is required",
+      "birthPlaceRequired": "Birth place is required",
+      "invalidLocation": "Unable to find this location. Please try a different search.",
+      "invalidTime": "Please enter a valid time format (HH:MM)"
+    }
+  },
+  "AstrologyResult": {
+    "title": "Your Birth Chart",
+    "subtitle": "A celestial map of the moment you entered this world",
+    "sections": {
+      "chartWheel": "Chart Wheel",
+      "planetaryPositions": "Planetary Positions",
+      "houseCusps": "House Cusps",
+      "aspects": "Aspects",
+      "interpretation": "AI Interpretation"
+    },
+    "interpretation": {
+      "generating": "Channeling cosmic wisdom...",
+      "sunSign": "Sun Sign Analysis",
+      "moonSign": "Moon Sign Analysis",
+      "risingSign": "Rising Sign Analysis",
+      "dominantElements": "Dominant Elements",
+      "dominantModalities": "Dominant Modalities",
+      "overallTheme": "Overall Chart Theme",
+      "strengths": "Core Strengths",
+      "challenges": "Growth Areas",
+      "lifeThemes": "Life Themes"
+    },
+    "planetInfo": {
+      "sign": "Sign",
+      "house": "House",
+      "degree": "Degree",
+      "retrograde": "Retrograde"
+    },
+    "aspectTypes": {
+      "conjunction": "Conjunction",
+      "sextile": "Sextile",
+      "square": "Square",
+      "trine": "Trine",
+      "opposition": "Opposition",
+      "quincunx": "Quincunx"
+    }
+  },
+  "Tarot": {
+    "title": "Tarot Reading",
+    "subtitle": "Seek guidance from the ancient cards",
+    "description": "Focus on your question, select a spread, and let the universe reveal its wisdom.",
+    "form": {
+      "question": "Your Question",
+      "questionPlaceholder": "What guidance do you seek? (optional)",
+      "questionDescription": "Framing a clear intention helps channel more focused insights.",
+      "spread": "Choose Your Spread",
+      "spreadDescription": "Select how many cards to draw for your reading"
+    },
+    "buttons": {
+      "shuffle": "Shuffle the Deck",
+      "shuffling": "Shuffling the cosmic energies...",
+      "draw": "Draw Cards",
+      "drawing": "Revealing your cards...",
+      "revealNext": "Reveal Next Card",
+      "revealAll": "Reveal All Cards",
+      "newReading": "New Reading",
+      "saveReading": "Save This Reading"
+    },
+    "instructions": {
+      "focus": "Take a deep breath and focus on your question",
+      "shuffle": "Click to shuffle when you feel ready",
+      "draw": "The cards will be drawn when the energy feels aligned"
+    }
+  },
+  "TarotResult": {
+    "title": "Your Reading",
+    "subtitle": "The cards have spoken",
+    "sections": {
+      "cards": "Your Cards",
+      "positions": "Card Positions",
+      "meanings": "Card Meanings",
+      "synthesis": "Overall Message"
+    },
+    "cardInfo": {
+      "upright": "Upright",
+      "reversed": "Reversed",
+      "position": "Position",
+      "keywords": "Keywords",
+      "meaning": "Meaning"
+    },
+    "interpretation": {
+      "generating": "Weaving the threads of destiny...",
+      "cardMeaning": "Card Meaning",
+      "positionContext": "In This Position",
+      "overallMessage": "Overall Message",
+      "guidance": "Guidance",
+      "reflection": "Questions for Reflection"
+    }
+  },
+  "Spreads": {
+    "single": {
+      "name": "Single Card",
+      "description": "A quick insight for daily guidance or a focused question"
+    },
+    "threeCard": {
+      "name": "Three Card Spread",
+      "description": "Past, Present, and Future - a classic spread for understanding your journey",
+      "positions": {
+        "past": "Past",
+        "present": "Present",
+        "future": "Future"
+      }
+    },
+    "celticCross": {
+      "name": "Celtic Cross",
+      "description": "A comprehensive 10-card spread for deep insight into complex situations",
+      "positions": {
+        "present": "Present Situation",
+        "challenge": "Challenge/Cross",
+        "foundation": "Foundation",
+        "recentPast": "Recent Past",
+        "bestOutcome": "Best Possible Outcome",
+        "nearFuture": "Near Future",
+        "selfPerception": "How You See Yourself",
+        "environment": "External Influences",
+        "hopesAndFears": "Hopes and Fears",
+        "finalOutcome": "Final Outcome"
+      }
+    }
+  },
+  "Readings": {
+    "title": "My Readings",
+    "subtitle": "Your journey through the stars and cards",
+    "description": "Review your past readings and track your spiritual growth over time.",
+    "empty": {
+      "title": "No Readings Yet",
+      "description": "Start your journey by getting an astrology or tarot reading.",
+      "cta": "Get Your First Reading"
+    },
+    "filters": {
+      "all": "All Readings",
+      "astrology": "Astrology",
+      "tarot": "Tarot",
+      "recent": "Recent",
+      "oldest": "Oldest",
+      "favorites": "Favorites"
+    },
+    "card": {
+      "viewDetails": "View Details",
+      "delete": "Delete",
+      "addToFavorites": "Add to Favorites",
+      "removeFromFavorites": "Remove from Favorites",
+      "createdAt": "Created on {date}"
+    },
+    "deleteConfirm": {
+      "title": "Delete Reading?",
+      "message": "This action cannot be undone. Are you sure you want to delete this reading?"
+    }
+  },
+  "Planets": {
+    "Sun": "Sun",
+    "Moon": "Moon",
+    "Mercury": "Mercury",
+    "Venus": "Venus",
+    "Mars": "Mars",
+    "Jupiter": "Jupiter",
+    "Saturn": "Saturn",
+    "Uranus": "Uranus",
+    "Neptune": "Neptune",
+    "Pluto": "Pluto",
+    "NorthNode": "North Node",
+    "SouthNode": "South Node",
+    "Chiron": "Chiron",
+    "Ascendant": "Ascendant",
+    "Midheaven": "Midheaven",
+    "Descendant": "Descendant",
+    "IC": "Imum Coeli"
+  },
+  "Zodiac": {
+    "Aries": "Aries",
+    "Taurus": "Taurus",
+    "Gemini": "Gemini",
+    "Cancer": "Cancer",
+    "Leo": "Leo",
+    "Virgo": "Virgo",
+    "Libra": "Libra",
+    "Scorpio": "Scorpio",
+    "Sagittarius": "Sagittarius",
+    "Capricorn": "Capricorn",
+    "Aquarius": "Aquarius",
+    "Pisces": "Pisces"
+  },
+  "Elements": {
+    "Fire": "Fire",
+    "Earth": "Earth",
+    "Air": "Air",
+    "Water": "Water"
+  },
+  "Modalities": {
+    "Cardinal": "Cardinal",
+    "Fixed": "Fixed",
+    "Mutable": "Mutable"
+  },
+  "HouseSystems": {
+    "placidus": {
+      "name": "Placidus",
+      "description": "The most widely used system, based on time divisions"
+    },
+    "koch": {
+      "name": "Koch",
+      "description": "Popular in German-speaking countries, time-based calculation"
+    },
+    "wholeSign": {
+      "name": "Whole Sign",
+      "description": "The oldest system, each sign occupies one whole house"
+    },
+    "equal": {
+      "name": "Equal House",
+      "description": "Each house spans exactly 30 degrees from the Ascendant"
+    },
+    "campanus": {
+      "name": "Campanus",
+      "description": "Space-based system dividing the prime vertical"
+    },
+    "regiomontanus": {
+      "name": "Regiomontanus",
+      "description": "Space-based system using the celestial equator"
+    }
+  },
+  "Chat": {
+    "title": "Ask the Cosmos",
+    "subtitle": "Continue your exploration with AI guidance",
+    "askQuestions": "Ask follow-up questions about your reading",
+    "placeholder": "Type your question here...",
+    "send": "Send",
+    "sending": "Consulting the stars...",
+    "suggestions": {
+      "title": "Suggested Questions",
+      "astrology": [
+        "What does my Sun-Moon combination reveal about my personality?",
+        "How do my challenging aspects influence my life path?",
+        "What career paths align with my chart?"
+      ],
+      "tarot": [
+        "Can you elaborate on the main card's meaning for my situation?",
+        "What action should I take based on this reading?",
+        "How do these cards relate to each other?"
+      ]
+    }
+  },
+  "Errors": {
+    "generic": "Something went wrong. Please try again.",
+    "notFound": "The requested page could not be found.",
+    "authRequired": "Please sign in to access this feature.",
+    "invalidData": "The provided data is invalid. Please check your input.",
+    "networkError": "Network error. Please check your connection and try again.",
+    "serverError": "Server error. Our team has been notified.",
+    "rateLimited": "Too many requests. Please wait a moment and try again.",
+    "locationNotFound": "Unable to find this location. Please try a different search.",
+    "calculationError": "Error calculating chart. Please verify your birth details.",
+    "aiError": "AI interpretation unavailable. Please try again later.",
+    "sessionExpired": "Your session has expired. Please sign in again."
+  },
+  "Meta": {
+    "title": "AI Zhanxing - Astrology & Tarot",
+    "description": "Discover your cosmic destiny with AI-powered astrology birth charts and tarot readings.",
+    "keywords": "astrology, tarot, birth chart, natal chart, horoscope, AI, divination"
+  }
+}
