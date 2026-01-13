@@ -60,6 +60,31 @@ export function identifyUser(
 }
 
 /**
+ * Capture an exception/error in PostHog (server-side)
+ */
+export function captureException(
+  distinctId: string,
+  error: Error,
+  properties?: Record<string, unknown>
+): void {
+  try {
+    const client = getPostHogClient()
+    client.capture({
+      distinctId,
+      event: '$exception',
+      properties: {
+        $exception_message: error.message,
+        $exception_type: error.name,
+        $exception_stack_trace_raw: error.stack,
+        ...properties,
+      },
+    })
+  } catch (err) {
+    console.error('PostHog captureException error:', err)
+  }
+}
+
+/**
  * Shutdown PostHog client (call at end of serverless function)
  */
 export async function shutdownPostHog(): Promise<void> {

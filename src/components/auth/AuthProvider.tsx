@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { usePostHog } from '@posthog/react';
 import type { User, Session } from '@supabase/supabase-js';
 import type { CreditsState, SaveLimitState } from '@/lib/types';
 
@@ -51,6 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isSaveLimitLoading, setIsSaveLimitLoading] = useState(false);
 
   const supabase = createClient();
+  const posthog = usePostHog();
 
   // Fetch credits from API
   const refreshCredits = useCallback(async () => {
@@ -134,6 +136,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       subscription.unsubscribe();
     };
   }, [supabase.auth]);
+
+  // Identify user with PostHog when user changes
+  useEffect(() => {
+    if (user?.email && posthog) {
+      posthog.identify(user.email, {
+        email: user.email,
+        user_id: user.id,
+        created_at: user.created_at,
+      });
+    } else if (!user && posthog) {
+      posthog.reset();
+    }
+  }, [user, posthog]);
 
   // Fetch credits and save limit when user changes
   useEffect(() => {
