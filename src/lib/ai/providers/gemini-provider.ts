@@ -1,26 +1,45 @@
 /**
  * Gemini AI Provider (Google)
  * Uses @google/genai SDK with thinking config support
+ * Integrated with PostHog for LLM analytics
  */
 
 import { GoogleGenAI, type Content } from '@google/genai';
+import { PostHogGoogleGenAI } from '@posthog/ai/gemini';
 import { BaseProvider } from './base-provider';
 import type { AIMessage, AIResponse, AIRequestOptions, AIToolCall, AIStreamChunk } from '../types';
 import { PROVIDER_CONFIG } from '../config';
+import { getPostHogClient } from '@/lib/posthog';
 
 export class GeminiProvider extends BaseProvider {
   type = 'gemini' as const;
-  private client: GoogleGenAI | null = null;
+  private client: PostHogGoogleGenAI | null = null;
+  private rawClient: GoogleGenAI | null = null; // For streaming
 
-  private getClient(): GoogleGenAI {
+  private getClient(): PostHogGoogleGenAI {
     if (!this.client) {
       const apiKey = process.env.GOOGLE_AI_API_KEY;
       if (!apiKey) {
         throw new Error('GOOGLE_AI_API_KEY not set');
       }
-      this.client = new GoogleGenAI({ apiKey });
+      // Use PostHog-wrapped client for automatic LLM analytics
+      this.client = new PostHogGoogleGenAI({
+        apiKey,
+        posthog: getPostHogClient(),
+      });
     }
     return this.client;
+  }
+
+  private getRawClient(): GoogleGenAI {
+    if (!this.rawClient) {
+      const apiKey = process.env.GOOGLE_AI_API_KEY;
+      if (!apiKey) {
+        throw new Error('GOOGLE_AI_API_KEY not set');
+      }
+      this.rawClient = new GoogleGenAI({ apiKey });
+    }
+    return this.rawClient;
   }
 
   isAvailable(): boolean {
@@ -113,7 +132,8 @@ export class GeminiProvider extends BaseProvider {
     messages: AIMessage[],
     options?: AIRequestOptions
   ): AsyncGenerator<AIStreamChunk, void, unknown> {
-    const client = this.getClient();
+    // Use raw client for streaming
+    const client = this.getRawClient();
     const modelName = options?.model || PROVIDER_CONFIG.gemini.model;
 
     // Separate system message from conversation

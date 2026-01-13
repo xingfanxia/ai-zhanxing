@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Send, Loader2, User, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { usePostHog } from "@posthog/react";
 
 interface Message {
   role: "user" | "assistant";
@@ -28,6 +29,7 @@ export function ChatInterface({
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const posthog = usePostHog();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -67,6 +69,14 @@ export function ChatInterface({
         ...prev,
         { role: "assistant", content: data.response },
       ]);
+
+      // Track follow-up question event
+      posthog?.capture("follow_up_question_asked", {
+        context_type: contextType,
+        context_id: contextId,
+        message_count: messages.length + 2, // +2 for user message and assistant response
+        question_length: userMessage.length,
+      });
     } catch (error) {
       setMessages((prev) => [
         ...prev,

@@ -1,25 +1,44 @@
 /**
  * Claude AI Provider (Anthropic)
+ * Integrated with PostHog for LLM analytics
  */
 
 import Anthropic from '@anthropic-ai/sdk';
+import { PostHogAnthropic } from '@posthog/ai/anthropic';
 import { BaseProvider } from './base-provider';
 import type { AIMessage, AIResponse, AIRequestOptions, AIToolCall, AIStreamChunk } from '../types';
 import { PROVIDER_CONFIG } from '../config';
+import { getPostHogClient } from '@/lib/posthog';
 
 export class ClaudeProvider extends BaseProvider {
   type = 'claude' as const;
-  private client: Anthropic | null = null;
+  private client: PostHogAnthropic | null = null;
+  private rawClient: Anthropic | null = null; // For streaming (PostHog wrapper doesn't support all stream events)
 
-  private getClient(): Anthropic {
+  private getClient(): PostHogAnthropic {
     if (!this.client) {
       const apiKey = process.env.ANTHROPIC_API_KEY;
       if (!apiKey) {
         throw new Error('ANTHROPIC_API_KEY not set');
       }
-      this.client = new Anthropic({ apiKey });
+      // Use PostHog-wrapped client for automatic LLM analytics
+      this.client = new PostHogAnthropic({
+        apiKey,
+        posthog: getPostHogClient(),
+      });
     }
     return this.client;
+  }
+
+  private getRawClient(): Anthropic {
+    if (!this.rawClient) {
+      const apiKey = process.env.ANTHROPIC_API_KEY;
+      if (!apiKey) {
+        throw new Error('ANTHROPIC_API_KEY not set');
+      }
+      this.rawClient = new Anthropic({ apiKey });
+    }
+    return this.rawClient;
   }
 
   isAvailable(): boolean {
@@ -72,7 +91,8 @@ export class ClaudeProvider extends BaseProvider {
     messages: AIMessage[],
     options?: AIRequestOptions
   ): AsyncGenerator<AIStreamChunk, void, unknown> {
-    const client = this.getClient();
+    // Use raw client for streaming (PostHog wrapper doesn't support stream method)
+    const client = this.getRawClient();
     const model = options?.model || PROVIDER_CONFIG.claude.model;
 
     // Separate system message from conversation

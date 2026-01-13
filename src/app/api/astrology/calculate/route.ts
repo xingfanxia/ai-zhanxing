@@ -14,6 +14,7 @@ import {
   CalculationError,
   InvalidBirthDataError,
 } from '@/lib/calculation';
+import { trackEvent } from '@/lib/posthog';
 
 // Request body type
 interface CalculateRequest {
@@ -85,6 +86,15 @@ export async function POST(request: NextRequest) {
 
     // Calculate natal chart
     const chart = calculateNatalChart(body.birthData, body.options);
+
+    // Track natal chart calculation event
+    trackEvent('anonymous', 'natal_chart_calculated', {
+      sun_sign: chart.planets.Sun.sign,
+      moon_sign: chart.planets.Moon.sign,
+      rising_sign: chart.ascendant.sign,
+      house_system: chart.houses.system,
+      has_birth_time: body.birthData.time !== null,
+    });
 
     // Return the chart
     return NextResponse.json({

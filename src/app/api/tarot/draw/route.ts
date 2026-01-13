@@ -16,6 +16,7 @@ import {
   type TarotSpread,
   type ThreeCardSpread,
 } from '@/lib/knowledge/tarot';
+import { trackEvent } from '@/lib/posthog';
 
 // Valid spread types
 type SpreadType =
@@ -216,6 +217,16 @@ export async function POST(request: NextRequest) {
       },
       reversed: draw.reversed,
     }));
+
+    // Track tarot reading started event
+    trackEvent('anonymous', 'tarot_reading_started', {
+      spread_type: spread.id,
+      spread_name: spread.name.en,
+      card_count: cardCount,
+      allow_reversed: allowReversed,
+      reversed_cards_count: cards.filter(c => c.reversed).length,
+      major_arcana_count: cards.filter(c => c.card.arcana === 'Major Arcana').length,
+    });
 
     return NextResponse.json({
       success: true,

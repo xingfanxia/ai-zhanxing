@@ -16,6 +16,7 @@ import {
   type TarotCard,
   type MinorArcanaCard,
 } from '@/lib/knowledge/tarot';
+import { trackEvent } from '@/lib/posthog';
 
 // Card in reading
 interface ReadingCard {
@@ -251,6 +252,19 @@ export async function POST(request: NextRequest) {
       console.error('Failed to save reading:', saveError);
       // Still return the interpretation even if save fails
     }
+
+    // Track AI interpretation event for tarot
+    trackEvent(user.id, 'ai_interpretation_generated', {
+      reading_type: 'tarot',
+      ai_provider: providerType,
+      spread_type: body.spread_type,
+      card_count: body.cards.length,
+      language: body.language || 'en',
+      tokens_used: response.usage
+        ? response.usage.inputTokens + response.usage.outputTokens
+        : null,
+      reading_id: readingId,
+    });
 
     return NextResponse.json({
       success: true,

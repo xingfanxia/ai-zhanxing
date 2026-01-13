@@ -16,6 +16,7 @@ import {
   HOUSES,
   ALL_ASPECTS,
 } from '@/lib/knowledge/astrology';
+import { trackEvent } from '@/lib/posthog';
 
 // Request body type
 interface InterpretRequest {
@@ -197,6 +198,18 @@ export async function POST(request: NextRequest) {
       console.error('Failed to save reading:', saveError);
       // Still return the interpretation even if save fails
     }
+
+    // Track AI interpretation event
+    trackEvent(user.id, 'ai_interpretation_generated', {
+      reading_type: 'astrology',
+      ai_provider: providerType,
+      has_question: !!body.question,
+      language: body.language || 'en',
+      tokens_used: response.usage
+        ? response.usage.inputTokens + response.usage.outputTokens
+        : null,
+      reading_id: readingId,
+    });
 
     return NextResponse.json({
       success: true,
