@@ -14,7 +14,7 @@ import {
   CalculationError,
   InvalidBirthDataError,
 } from '@/lib/calculation';
-import { trackEvent } from '@/lib/posthog';
+import { trackEvent, flushPostHog } from '@/lib/posthog';
 
 // Request body type
 interface CalculateRequest {
@@ -95,6 +95,9 @@ export async function POST(request: NextRequest) {
       house_system: chart.houses.system,
       has_birth_time: body.birthData.time !== null,
     });
+
+    // Flush PostHog events before serverless function terminates
+    await flushPostHog();
 
     // Return the chart
     return NextResponse.json({

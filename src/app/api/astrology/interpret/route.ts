@@ -16,7 +16,7 @@ import {
   HOUSES,
   ALL_ASPECTS,
 } from '@/lib/knowledge/astrology';
-import { trackEvent } from '@/lib/posthog';
+import { trackEvent, flushPostHog } from '@/lib/posthog';
 
 // Request body type
 interface InterpretRequest {
@@ -210,6 +210,9 @@ export async function POST(request: NextRequest) {
         : null,
       reading_id: readingId,
     });
+
+    // Flush PostHog events before serverless function terminates
+    await flushPostHog();
 
     return NextResponse.json({
       success: true,

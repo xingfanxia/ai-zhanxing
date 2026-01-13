@@ -16,7 +16,7 @@ import {
   type TarotSpread,
   type ThreeCardSpread,
 } from '@/lib/knowledge/tarot';
-import { trackEvent } from '@/lib/posthog';
+import { trackEvent, flushPostHog } from '@/lib/posthog';
 
 // Valid spread types
 type SpreadType =
@@ -227,6 +227,9 @@ export async function POST(request: NextRequest) {
       reversed_cards_count: cards.filter(c => c.reversed).length,
       major_arcana_count: cards.filter(c => c.card.arcana === 'Major Arcana').length,
     });
+
+    // Flush PostHog events before serverless function terminates
+    await flushPostHog();
 
     return NextResponse.json({
       success: true,

@@ -16,7 +16,7 @@ import {
   type TarotCard,
   type MinorArcanaCard,
 } from '@/lib/knowledge/tarot';
-import { trackEvent } from '@/lib/posthog';
+import { trackEvent, flushPostHog } from '@/lib/posthog';
 
 // Card in reading
 interface ReadingCard {
@@ -265,6 +265,9 @@ export async function POST(request: NextRequest) {
         : null,
       reading_id: readingId,
     });
+
+    // Flush PostHog events before serverless function terminates
+    await flushPostHog();
 
     return NextResponse.json({
       success: true,

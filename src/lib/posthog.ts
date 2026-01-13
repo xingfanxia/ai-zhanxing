@@ -85,6 +85,16 @@ export function captureException(
 }
 
 /**
+ * Flush all pending PostHog events
+ * CRITICAL: Call this at the end of serverless functions to ensure events are sent
+ */
+export async function flushPostHog(): Promise<void> {
+  if (posthogClient) {
+    await posthogClient.flush()
+  }
+}
+
+/**
  * Shutdown PostHog client (call at end of serverless function)
  */
 export async function shutdownPostHog(): Promise<void> {
