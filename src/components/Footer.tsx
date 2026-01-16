@@ -8,7 +8,7 @@ const sisterApps = [
   { name: "AI解梦", href: "https://jiemeng.ax0x.ai", current: false },
   { name: "占星", href: "#", current: true, comingSoon: true },
   { name: "六壬起卦", href: "https://liuren.ax0x.ai", current: false },
-  { name: "人生K线", href: "https://kline.ax0x.ai", current: false },
+  { name: "人生K线", href: "https://kxian.ax0x.ai", current: false },
   { name: "对话式MBTI测试", href: "https://mbti.ax0x.ai", current: false },
 ];
 
