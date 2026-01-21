@@ -15,6 +15,7 @@ import { ChatInterface } from "@/components/chat/ChatInterface";
 import { NatalChartWheel } from "@/components/astrology";
 import { isValidUUID } from "@/lib/utils/validation";
 import { useTranslations } from "next-intl";
+import { useAuth, notifyReferralBonus } from "@/components/auth/AuthProvider";
 import type {
   Planet as PlanetType,
   PlanetPosition,
@@ -148,6 +149,7 @@ export default function AstrologyResultPage({
   const tNav = useTranslations("Navigation");
   const tCommon = useTranslations("Common");
   const tChat = useTranslations("Chat");
+  const { refreshCredits } = useAuth();
   const [chartData, setChartData] = useState<ChartData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isInterpretationLoading, setIsInterpretationLoading] = useState(false);
@@ -259,6 +261,7 @@ export default function AstrologyResultPage({
 
     setIsInterpretationLoading(true);
     setError(null);
+    setInterpretation(""); // Reset for streaming
 
     try {
       // Build chart data for API
@@ -329,13 +332,95 @@ export default function AstrologyResultPage({
         throw new Error("Please sign in to get AI interpretation");
       }
 
+      if (response.status === 402) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Insufficient credits");
+      }
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to get interpretation");
       }
 
-      const data = await response.json();
-      setInterpretation(data.data?.interpretation || data.interpretation);
+      // Check if response is SSE streaming or JSON
+      const contentType = response.headers.get("content-type") || "";
+
+      if (contentType.includes("text/event-stream")) {
+        // Handle SSE streaming response
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        let fullText = "";
+        let sseBuffer = "";
+
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value);
+            sseBuffer += chunk;
+
+            // Process complete lines only
+            const lines = sseBuffer.split("\n");
+            sseBuffer = lines.pop() || "";
+
+            for (const line of lines) {
+              if (line.startsWith("data: ")) {
+                try {
+                  const jsonStr = line.slice(6);
+                  if (!jsonStr.trim()) continue;
+                  const data = JSON.parse(jsonStr);
+
+                  // Handle text chunks
+                  if (data.text) {
+                    fullText += data.text;
+                    setInterpretation(fullText);
+                  }
+
+                  // Handle credits event with potential referral bonus
+                  if (data.type === "credits") {
+                    // Refresh credits display
+                    await refreshCredits();
+                    // Check if referral bonus was claimed
+                    if (data.referralBonusClaimed && data.referralBonusAmount > 0) {
+                      // Notify for toast notification after a short delay
+                      setTimeout(() => {
+                        notifyReferralBonus("unlock", data.referralBonusAmount, data.remaining);
+                      }, 500);
+                    }
+                  }
+
+                  if (data.done) {
+                    break;
+                  }
+
+                  if (data.error) {
+                    throw new Error(data.message || "Interpretation failed");
+                  }
+                } catch (e) {
+                  // Skip partial chunks
+                  if (e instanceof SyntaxError) continue;
+                  throw e;
+                }
+              }
+            }
+          }
+        }
+      } else {
+        // Handle regular JSON response (fallback for non-streaming providers)
+        const data = await response.json();
+        setInterpretation(data.data?.interpretation || data.interpretation);
+
+        // Handle referral bonus for non-streaming response
+        if (data.referralBonusClaimed && data.referralBonusAmount > 0) {
+          setTimeout(() => {
+            notifyReferralBonus("unlock", data.referralBonusAmount, data.credits);
+          }, 500);
+        }
+
+        // Refresh credits
+        await refreshCredits();
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to get interpretation");
     } finally {
