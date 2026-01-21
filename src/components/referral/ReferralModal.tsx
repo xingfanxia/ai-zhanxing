@@ -356,7 +356,7 @@ export function ReferralModal({
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary font-bold">3.</span>
-                      <span>好友首次使用付费功能后，您将获得 <b className="text-primary">+20积分</b></span>
+                      <span>好友注册成功 <b className="text-primary">+5积分</b>，使用任意解锁功能后再得 <b className="text-primary">+15积分</b></span>
                     </li>
                   </ul>
                 </div>
