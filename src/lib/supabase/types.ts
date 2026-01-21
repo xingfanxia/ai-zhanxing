@@ -96,3 +96,19 @@ export interface CreditsState {
   credits: number;
   checkedInToday: boolean;
 }
+
+// Function return types for RPC calls
+export interface GetCreditsResult {
+  credits: number;
+  checked_in_today: boolean;
+  bonus_awarded: boolean;
+}
+
+export interface DeductCreditResult {
+  success: boolean;
+  remaining_total: number;
+  remaining_daily: number;
+  error_message: string | null;
+  referral_bonus_claimed: boolean;
+  referral_bonus_amount: number;
+}

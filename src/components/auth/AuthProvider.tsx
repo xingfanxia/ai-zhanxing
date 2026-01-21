@@ -40,6 +40,27 @@ function notifyCheckInBonus(credits: number) {
   checkInCallbacks.forEach(cb => cb(credits));
 }
 
+// Referral bonus event for toast notifications
+type ReferralBonusType = 'signup' | 'unlock';
+interface ReferralBonusData {
+  type: ReferralBonusType;
+  amount: number;
+  credits: number;
+}
+type ReferralBonusCallback = (data: ReferralBonusData) => void;
+let referralBonusCallbacks: ReferralBonusCallback[] = [];
+
+export function onReferralBonus(callback: ReferralBonusCallback) {
+  referralBonusCallbacks.push(callback);
+  return () => {
+    referralBonusCallbacks = referralBonusCallbacks.filter(cb => cb !== callback);
+  };
+}
+
+export function notifyReferralBonus(type: ReferralBonusType, amount: number, credits: number) {
+  referralBonusCallbacks.forEach(cb => cb({ type, amount, credits }));
+}
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -73,6 +94,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Trigger toast if bonus was just awarded
         if (data.bonusAwarded) {
           notifyCheckInBonus(data.credits);
+        }
+        // Check for referral signup bonus toast (only show once)
+        if (data.wasReferred && typeof window !== 'undefined') {
+          const shownKey = `referral_signup_bonus_shown_${user?.id}`;
+          if (!localStorage.getItem(shownKey)) {
+            localStorage.setItem(shownKey, 'true');
+            // Small delay to let the page render first
+            setTimeout(() => {
+              notifyReferralBonus('signup', 5, data.credits);
+            }, 500);
+          }
         }
       } else {
         // User might be new, use defaults
