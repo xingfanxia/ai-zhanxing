@@ -14,9 +14,14 @@ interface PendingReferral {
 
 /**
  * Hook to capture referral codes from URL and store in localStorage
+ * This is used to pre-fill the referral code input in the signup form.
+ * 
  * Usage: Add to your app's root layout or main page component
  *
  * Example: https://zhanxing.panpanmao.com/?ref=PPM-ABC123
+ * 
+ * Note: The referral code is now primarily passed during signup via
+ * user metadata. This hook helps pre-fill the signup form.
  */
 export function useReferralCapture(sourceApp: string = 'zhanxing') {
   const searchParams = useSearchParams();
@@ -41,6 +46,7 @@ export function useReferralCapture(sourceApp: string = 'zhanxing') {
 
 /**
  * Get pending referral from localStorage (if not expired)
+ * @deprecated Use the referral code input in signup form instead
  */
 export function getPendingReferral(): PendingReferral | null {
   try {
@@ -63,6 +69,7 @@ export function getPendingReferral(): PendingReferral | null {
 
 /**
  * Clear pending referral from localStorage
+ * @deprecated Use the referral code input in signup form instead
  */
 export function clearPendingReferral(): void {
   localStorage.removeItem(REFERRAL_CODE_KEY);
@@ -71,6 +78,10 @@ export function clearPendingReferral(): void {
 /**
  * Link pending referral to current user (call after successful signup)
  * Returns true if referral was successfully linked
+ * 
+ * @deprecated Referral codes are now passed during signup via user metadata.
+ * Manual linking is available in ReferralModal for users who didn't
+ * enter a code during signup. This function is kept for backward compatibility.
  */
 export async function linkPendingReferral(): Promise<boolean> {
   const pending = getPendingReferral();

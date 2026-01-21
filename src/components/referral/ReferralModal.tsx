@@ -3,8 +3,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Copy, Check, Gift, Users, Coins, Share2, Loader2 } from 'lucide-react';
+import { X, Copy, Check, Gift, Users, Coins, Share2, Loader2, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useAuth } from '@/components/auth/AuthProvider';
 
 interface ReferralStats {
@@ -38,12 +39,18 @@ export function ReferralModal({
   appName = '占星猫',
   appUrl = typeof window !== 'undefined' ? window.location.origin : '',
 }: ReferralModalProps) {
-  const { user } = useAuth();
+  const { user, refreshCredits } = useAuth();
   const [mounted, setMounted] = useState(false);
   const [stats, setStats] = useState<ReferralStats | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Manual referral code entry state
+  const [manualCode, setManualCode] = useState('');
+  const [isLinking, setIsLinking] = useState(false);
+  const [linkError, setLinkError] = useState<string | null>(null);
+  const [linkSuccess, setLinkSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -72,6 +79,10 @@ export function ReferralModal({
   useEffect(() => {
     if (isOpen && user) {
       fetchStats();
+      // Reset manual entry state when modal opens
+      setManualCode('');
+      setLinkError(null);
+      setLinkSuccess(null);
     }
   }, [isOpen, user, fetchStats]);
 
@@ -115,6 +126,45 @@ export function ReferralModal({
     } else {
       // Fallback: copy to clipboard
       handleCopy();
+    }
+  };
+
+  const handleLinkReferralCode = async () => {
+    if (!manualCode.trim()) {
+      setLinkError('请输入推荐码');
+      return;
+    }
+
+    setIsLinking(true);
+    setLinkError(null);
+    setLinkSuccess(null);
+
+    try {
+      const response = await fetch('/api/referral/link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: manualCode.trim().toUpperCase(),
+          sourceApp: 'zhanxing',
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setLinkSuccess('推荐码绑定成功！');
+        setManualCode('');
+        // Refresh stats to update hasBeenReferred
+        await fetchStats();
+        // Refresh credits in case bonus was awarded
+        refreshCredits();
+      } else {
+        setLinkError(data.message || '绑定推荐码失败');
+      }
+    } catch {
+      setLinkError('网络错误，请稍后重试');
+    } finally {
+      setIsLinking(false);
     }
   };
 
@@ -171,6 +221,49 @@ export function ReferralModal({
               <div className="text-center py-8 text-destructive">{error}</div>
             ) : stats ? (
               <>
+                {/* Manual Referral Code Entry - only show if user hasn't been referred */}
+                {!stats.hasBeenReferred && (
+                  <div className="space-y-3 p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <Tag className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                      <span className="text-sm font-medium text-amber-700 dark:text-amber-300">
+                        有推荐码？在此输入
+                      </span>
+                    </div>
+                    <p className="text-xs text-amber-600/80 dark:text-amber-400/80">
+                      注册后7天内可绑定推荐码，双方都能获得积分奖励
+                    </p>
+                    <div className="flex gap-2">
+                      <Input
+                        type="text"
+                        placeholder="输入推荐码"
+                        value={manualCode}
+                        onChange={(e) => setManualCode(e.target.value.toUpperCase())}
+                        className="flex-1 bg-background"
+                        maxLength={20}
+                        disabled={isLinking}
+                      />
+                      <Button
+                        onClick={handleLinkReferralCode}
+                        disabled={isLinking || !manualCode.trim()}
+                        size="sm"
+                      >
+                        {isLinking ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          '使用'
+                        )}
+                      </Button>
+                    </div>
+                    {linkError && (
+                      <p className="text-xs text-destructive">{linkError}</p>
+                    )}
+                    {linkSuccess && (
+                      <p className="text-xs text-green-600 dark:text-green-400">{linkSuccess}</p>
+                    )}
+                  </div>
+                )}
+
                 {/* Referral Code */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-muted-foreground">您的推荐码</label>

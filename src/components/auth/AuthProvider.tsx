@@ -5,7 +5,6 @@ import { createClient } from '@/lib/supabase/client';
 import { usePostHog } from '@posthog/react';
 import type { User, Session } from '@supabase/supabase-js';
 import type { CreditsState, SaveLimitState } from '@/lib/types';
-import { linkPendingReferral } from '@/hooks/useReferralCapture';
 
 interface AuthContextType {
   user: User | null;
@@ -16,8 +15,8 @@ interface AuthContextType {
   saveLimit: SaveLimitState;
   isSaveLimitLoading: boolean;
   signInWithEmail: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signUpWithEmail: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signInWithGoogle: () => Promise<{ error: Error | null }>;
+  signUpWithEmail: (email: string, password: string, referralCode?: string) => Promise<{ error: Error | null }>;
+  signInWithGoogle: (referralCode?: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   refreshCredits: () => Promise<void>;
   refreshSaveLimit: () => Promise<void>;
@@ -130,11 +129,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         setIsLoading(false);
-
-        // Link pending referral on sign in (new users via referral link)
-        if (event === 'SIGNED_IN' && session?.user) {
-          linkPendingReferral();
-        }
       }
     );
 
@@ -175,23 +169,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: error as Error | null };
   };
 
-  const signUpWithEmail = async (email: string, password: string) => {
+  const signUpWithEmail = async (email: string, password: string, referralCode?: string) => {
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         // Redirect to homepage after email confirmation (no callback needed)
         emailRedirectTo: `${window.location.origin}/`,
+        data: {
+          referral_code: referralCode || null,
+          source_app: 'zhanxing',
+        },
       },
     });
     return { error: error as Error | null };
   };
 
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = async (referralCode?: string) => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
+        queryParams: referralCode ? {
+          referral_code: referralCode,
+          source_app: 'zhanxing',
+        } : undefined,
       },
     });
     return { error: error as Error | null };

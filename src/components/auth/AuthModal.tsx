@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Mail, Lock, User, Loader2 } from 'lucide-react';
+import { X, Mail, Lock, User, Loader2, Gift } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from './AuthProvider';
@@ -14,10 +14,18 @@ interface AuthModalProps {
   defaultMode?: 'login' | 'signup';
 }
 
+// Helper to get referral code from URL
+function getReferralCodeFromUrl(): string {
+  if (typeof window === 'undefined') return '';
+  const params = new URLSearchParams(window.location.search);
+  return params.get('ref')?.trim().toUpperCase() || '';
+}
+
 export function AuthModal({ isOpen, onClose, defaultMode = 'login' }: AuthModalProps) {
   const [mode, setMode] = useState<'login' | 'signup'>(defaultMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [referralCode, setReferralCode] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -29,6 +37,16 @@ export function AuthModal({ isOpen, onClose, defaultMode = 'login' }: AuthModalP
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Pre-fill referral code from URL when modal opens in signup mode
+  useEffect(() => {
+    if (isOpen && mode === 'signup') {
+      const urlCode = getReferralCodeFromUrl();
+      if (urlCode && !referralCode) {
+        setReferralCode(urlCode);
+      }
+    }
+  }, [isOpen, mode, referralCode]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,7 +73,7 @@ export function AuthModal({ isOpen, onClose, defaultMode = 'login' }: AuthModalP
           onClose();
         }
       } else {
-        const { error } = await signUpWithEmail(email, password);
+        const { error } = await signUpWithEmail(email, password, referralCode || undefined);
         if (error) {
           setError(translateError(error.message));
         } else {
@@ -71,7 +89,9 @@ export function AuthModal({ isOpen, onClose, defaultMode = 'login' }: AuthModalP
 
   const handleGoogleSignIn = async () => {
     setError(null);
-    const { error } = await signInWithGoogle();
+    // Pass referral code from URL or input field
+    const code = referralCode || getReferralCodeFromUrl();
+    const { error } = await signInWithGoogle(code || undefined);
     if (error) {
       setError(error.message);
     }
@@ -195,6 +215,26 @@ export function AuthModal({ isOpen, onClose, defaultMode = 'login' }: AuthModalP
                   />
                 </div>
               </div>
+
+              {/* Referral code input - only in signup mode */}
+              {mode === 'signup' && (
+                <div className="space-y-2">
+                  <div className="relative">
+                    <Gift className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      type="text"
+                      placeholder="Referral code (optional)"
+                      value={referralCode}
+                      onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                      className="pl-10"
+                      maxLength={20}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground pl-1">
+                    Have a friend&apos;s referral code? Enter it to get bonus credits!
+                  </p>
+                </div>
+              )}
 
               {error && (
                 <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
