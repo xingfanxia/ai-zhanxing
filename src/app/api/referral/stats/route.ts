@@ -73,7 +73,7 @@ export async function GET() {
     return NextResponse.json({
       code: profile.referral_code,
       successfulReferrals: profile.successful_referrals || 0,
-      maxReferrals: 10,
+      maxReferrals: 5,
       pendingCount,
       completedCount,
       totalBonus,
