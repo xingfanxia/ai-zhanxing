@@ -9,12 +9,16 @@ import { Button } from '@/components/ui/button';
 import { getPendingReferral } from '@/hooks/useReferralCapture';
 
 const WELCOME_BANNER_DISMISSED_KEY = 'xuanxue_referral_welcome_dismissed';
+// Key to track if modal was auto-opened (so banner shouldn't show)
+const AUTO_OPEN_MODAL_KEY = 'xuanxue_referral_auto_opened';
 
 interface ReferralWelcomeBannerProps {
   onOpenSignup: () => void;
+  /** If true, modal will be auto-opened, so skip showing banner */
+  willAutoOpenModal?: boolean;
 }
 
-function ReferralWelcomeBannerInner({ onOpenSignup }: ReferralWelcomeBannerProps) {
+function ReferralWelcomeBannerInner({ onOpenSignup, willAutoOpenModal }: ReferralWelcomeBannerProps) {
   const { user, isLoading } = useAuth();
   const searchParams = useSearchParams();
   const [isVisible, setIsVisible] = useState(false);
@@ -38,18 +42,27 @@ function ReferralWelcomeBannerInner({ onOpenSignup }: ReferralWelcomeBannerProps
     // 1. There's a referral code in URL
     // 2. User is NOT logged in
     // 3. Banner hasn't been dismissed in this session
+    // 4. Modal won't be auto-opened (to prevent flash)
     if (isLoading) return;
 
     const isDismissed = sessionStorage.getItem(WELCOME_BANNER_DISMISSED_KEY);
+    const wasAutoOpened = sessionStorage.getItem(AUTO_OPEN_MODAL_KEY);
 
-    if (referralCode && !user && !isDismissed) {
+    // If modal will auto-open or was auto-opened, mark it and skip banner
+    if (willAutoOpenModal && referralCode && !user) {
+      sessionStorage.setItem(AUTO_OPEN_MODAL_KEY, 'true');
+      setIsVisible(false);
+      return;
+    }
+
+    if (referralCode && !user && !isDismissed && !wasAutoOpened) {
       // Small delay for smoother appearance
-      const timer = setTimeout(() => setIsVisible(true), 300);
+      const timer = setTimeout(() => setIsVisible(true), 100);
       return () => clearTimeout(timer);
     } else {
       setIsVisible(false);
     }
-  }, [referralCode, user, isLoading]);
+  }, [referralCode, user, isLoading, willAutoOpenModal]);
 
   const handleDismiss = () => {
     sessionStorage.setItem(WELCOME_BANNER_DISMISSED_KEY, 'true');
@@ -115,10 +128,10 @@ function ReferralWelcomeBannerInner({ onOpenSignup }: ReferralWelcomeBannerProps
   );
 }
 
-export function ReferralWelcomeBanner({ onOpenSignup }: ReferralWelcomeBannerProps) {
+export function ReferralWelcomeBanner({ onOpenSignup, willAutoOpenModal }: ReferralWelcomeBannerProps) {
   return (
     <Suspense fallback={null}>
-      <ReferralWelcomeBannerInner onOpenSignup={onOpenSignup} />
+      <ReferralWelcomeBannerInner onOpenSignup={onOpenSignup} willAutoOpenModal={willAutoOpenModal} />
     </Suspense>
   );
 }

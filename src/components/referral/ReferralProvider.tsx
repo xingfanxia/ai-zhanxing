@@ -21,26 +21,33 @@ function ReferralCapture({ sourceApp }: { sourceApp: string }) {
   return null;
 }
 
-// Component to detect referral code and auto-open signup modal
-function ReferralAutoSignup({ onOpenSignup }: { onOpenSignup: () => void }) {
+// Combined component to handle auto-open modal and welcome banner coordination
+// This prevents banner flash by coordinating both behaviors
+function ReferralAutoSignupWithBanner({ onOpenSignup }: { onOpenSignup: () => void }) {
   const searchParams = useSearchParams();
   const { user, isLoading } = useAuth();
+  const [hasAutoOpened, setHasAutoOpened] = useState(false);
+
+  // Check if we should auto-open the modal
+  const shouldAutoOpen = !isLoading && !!searchParams.get('ref') && !user;
 
   useEffect(() => {
     if (isLoading) return;
 
     const refCode = searchParams.get('ref');
     // Auto-open signup modal if referral code present and user not logged in
-    if (refCode && !user) {
-      // Small delay to let the page render first
+    if (refCode && !user && !hasAutoOpened) {
+      // Reduced delay for faster modal opening
       const timer = setTimeout(() => {
+        setHasAutoOpened(true);
         onOpenSignup();
-      }, 500);
+      }, 200);
       return () => clearTimeout(timer);
     }
-  }, [searchParams, user, isLoading, onOpenSignup]);
+  }, [searchParams, user, isLoading, onOpenSignup, hasAutoOpened]);
 
-  return null;
+  // Pass willAutoOpenModal to banner so it knows to skip showing
+  return <ReferralWelcomeBanner onOpenSignup={onOpenSignup} willAutoOpenModal={shouldAutoOpen} />;
 }
 
 export function ReferralProvider({
@@ -62,13 +69,10 @@ export function ReferralProvider({
         <ReferralCapture sourceApp={sourceApp} />
       </Suspense>
 
-      {/* Auto-open signup modal for referral visitors */}
+      {/* Auto-open signup modal for referral visitors + welcome banner (coordinated to prevent flash) */}
       <Suspense fallback={null}>
-        <ReferralAutoSignup onOpenSignup={handleOpenSignup} />
+        <ReferralAutoSignupWithBanner onOpenSignup={handleOpenSignup} />
       </Suspense>
-
-      {/* Referral welcome banner for non-logged-in users arriving via referral link */}
-      <ReferralWelcomeBanner onOpenSignup={handleOpenSignup} />
 
       {/* Referral announcement banner (one-time announcement for logged-in users) */}
       <ReferralAnnouncementBanner onOpenReferralModal={() => setIsReferralModalOpen(true)} />
