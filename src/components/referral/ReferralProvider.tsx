@@ -4,6 +4,7 @@ import { useState, Suspense } from 'react';
 import { useReferralCapture } from '@/hooks/useReferralCapture';
 import { ReferralBanner } from './ReferralBanner';
 import { ReferralModal } from './ReferralModal';
+import { ReferralAnnouncementBanner } from './ReferralAnnouncementBanner';
 
 interface ReferralProviderProps {
   children: React.ReactNode;
@@ -29,6 +30,9 @@ export function ReferralProvider({
       <Suspense fallback={null}>
         <ReferralCapture sourceApp={sourceApp} />
       </Suspense>
+
+      {/* Referral announcement banner (one-time announcement) */}
+      <ReferralAnnouncementBanner onOpenReferralModal={() => setIsReferralModalOpen(true)} />
 
       {/* Referral banner CTA */}
       <ReferralBanner onOpenReferralModal={() => setIsReferralModalOpen(true)} />
