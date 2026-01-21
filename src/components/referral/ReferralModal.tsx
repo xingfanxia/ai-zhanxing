@@ -170,7 +170,8 @@ export function ReferralModal({
 
   if (!mounted || !isOpen) return null;
 
-  const progressPercent = stats ? (stats.successfulReferrals / stats.maxReferrals) * 100 : 0;
+  const totalRegistered = stats ? stats.pendingCount + stats.successfulReferrals : 0;
+  const progressPercent = stats ? (totalRegistered / stats.maxReferrals) * 100 : 0;
 
   const modalContent = (
     <AnimatePresence>
@@ -309,7 +310,7 @@ export function ReferralModal({
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">推荐进度</span>
                     <span className="font-medium">
-                      {stats.successfulReferrals} / {stats.maxReferrals}
+                      {stats.pendingCount + stats.successfulReferrals} / {stats.maxReferrals}
                     </span>
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
@@ -341,7 +342,7 @@ export function ReferralModal({
                       <div className="text-center p-3 bg-muted/50 rounded-lg">
                         <Loader2 className="w-5 h-5 mx-auto mb-1 text-amber-500" />
                         <div className="text-lg font-bold">{stats.completedCount}</div>
-                        <div className="text-xs text-muted-foreground">已付费</div>
+                        <div className="text-xs text-muted-foreground">已消耗代币</div>
                         <div className="text-[10px] text-green-500">+15/人</div>
                       </div>
                       <div className="text-center p-3 bg-muted/50 rounded-lg">
