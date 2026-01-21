@@ -6,6 +6,7 @@ import { Gift, X, Sparkles } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { Button } from '@/components/ui/button';
+import { getPendingReferral } from '@/hooks/useReferralCapture';
 
 const WELCOME_BANNER_DISMISSED_KEY = 'xuanxue_referral_welcome_dismissed';
 
@@ -20,10 +21,15 @@ function ReferralWelcomeBannerInner({ onOpenSignup }: ReferralWelcomeBannerProps
   const [referralCode, setReferralCode] = useState<string | null>(null);
 
   useEffect(() => {
-    // Get referral code from URL
+    // Get referral code from URL OR localStorage (in case useReferralCapture already removed it from URL)
     const refCode = searchParams.get('ref');
-    if (refCode) {
+    const pendingReferral = getPendingReferral();
+
+    if (refCode && refCode.trim()) {
       setReferralCode(refCode.trim().toUpperCase());
+    } else if (pendingReferral?.code) {
+      // Fallback to localStorage if URL param was already removed by useReferralCapture
+      setReferralCode(pendingReferral.code);
     }
   }, [searchParams]);
 
