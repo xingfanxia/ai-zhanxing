@@ -204,7 +204,7 @@ export function ReferralModal({
               </div>
               <div>
                 <h2 className="text-xl font-bold">推荐好友</h2>
-                <p className="text-sm text-muted-foreground">邀请好友一起使用，双方各得20积分</p>
+                <p className="text-sm text-muted-foreground">邀请好友注册+5，使用解锁+15积分</p>
               </div>
             </div>
           </div>
@@ -324,23 +324,32 @@ export function ReferralModal({
                 </div>
 
                 {/* Stats Grid */}
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="text-center p-3 bg-muted/50 rounded-lg">
-                    <Users className="w-5 h-5 mx-auto mb-1 text-primary" />
-                    <div className="text-lg font-bold">{stats.completedCount}</div>
-                    <div className="text-xs text-muted-foreground">成功推荐</div>
-                  </div>
-                  <div className="text-center p-3 bg-muted/50 rounded-lg">
-                    <Loader2 className="w-5 h-5 mx-auto mb-1 text-amber-500" />
-                    <div className="text-lg font-bold">{stats.pendingCount}</div>
-                    <div className="text-xs text-muted-foreground">等待激活</div>
-                  </div>
-                  <div className="text-center p-3 bg-muted/50 rounded-lg">
-                    <Coins className="w-5 h-5 mx-auto mb-1 text-green-500" />
-                    <div className="text-lg font-bold">{stats.totalBonus}</div>
-                    <div className="text-xs text-muted-foreground">获得积分</div>
-                  </div>
-                </div>
+                {(() => {
+                  const totalReferrals = stats.pendingCount + stats.completedCount;
+                  const signupBonus = totalReferrals * 5;
+                  const actionBonus = stats.completedCount * 15;
+                  const totalEarned = signupBonus + actionBonus;
+
+                  return (
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="text-center p-3 bg-muted/50 rounded-lg">
+                        <Users className="w-5 h-5 mx-auto mb-1 text-primary" />
+                        <div className="text-lg font-bold">{stats.completedCount}</div>
+                        <div className="text-xs text-muted-foreground">已解锁</div>
+                      </div>
+                      <div className="text-center p-3 bg-muted/50 rounded-lg">
+                        <Loader2 className="w-5 h-5 mx-auto mb-1 text-amber-500" />
+                        <div className="text-lg font-bold">{stats.pendingCount}</div>
+                        <div className="text-xs text-muted-foreground">等待解锁</div>
+                      </div>
+                      <div className="text-center p-3 bg-muted/50 rounded-lg">
+                        <Coins className="w-5 h-5 mx-auto mb-1 text-green-500" />
+                        <div className="text-lg font-bold">{totalEarned}</div>
+                        <div className="text-xs text-muted-foreground">获得积分</div>
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 {/* How it works */}
                 <div className="pt-4 border-t border-border">
