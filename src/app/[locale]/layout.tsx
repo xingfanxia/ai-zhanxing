@@ -3,6 +3,7 @@ import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { AuthProvider } from "@/components/auth/AuthProvider";
+import { ReferralProvider } from "@/components/referral";
 import type { Locale } from "@/i18n/config";
 
 export function generateStaticParams() {
@@ -31,7 +32,11 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider messages={messages}>
-      <AuthProvider>{children}</AuthProvider>
+      <AuthProvider>
+        <ReferralProvider appName="占星猫" sourceApp="zhanxing">
+          {children}
+        </ReferralProvider>
+      </AuthProvider>
     </NextIntlClientProvider>
   );
 }

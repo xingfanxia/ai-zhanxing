@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import { usePostHog } from '@posthog/react';
 import type { User, Session } from '@supabase/supabase-js';
 import type { CreditsState, SaveLimitState } from '@/lib/types';
+import { linkPendingReferral } from '@/hooks/useReferralCapture';
 
 interface AuthContextType {
   user: User | null;
@@ -129,6 +130,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         setIsLoading(false);
+
+        // Link pending referral on sign in (new users via referral link)
+        if (event === 'SIGNED_IN' && session?.user) {
+          linkPendingReferral();
+        }
       }
     );
 
