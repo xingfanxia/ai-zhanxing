@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { User, LogOut, History, ChevronDown, Coins, Archive, Gift } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import { AuthModal } from './AuthModal';
+import { ReferralModal } from '@/components/referral';
 import { Button } from '@/components/ui/button';
 
 interface UserMenuProps {
@@ -16,6 +17,7 @@ export function UserMenu({ onHistoryClick, onReferralClick }: UserMenuProps) {
   const { user, isLoading, signOut, credits, saveLimit } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [showReferralModal, setShowReferralModal] = useState(false);
 
   if (isLoading) {
     return (
@@ -128,18 +130,20 @@ export function UserMenu({ onHistoryClick, onReferralClick }: UserMenuProps) {
                     </button>
                   )}
 
-                  {onReferralClick && (
-                    <button
-                      onClick={() => {
-                        setIsMenuOpen(false);
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      if (onReferralClick) {
                         onReferralClick();
-                      }}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-secondary rounded-md transition-colors"
-                    >
-                      <Gift className="w-4 h-4" />
-                      Referral
-                    </button>
-                  )}
+                      } else {
+                        setShowReferralModal(true);
+                      }
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-secondary rounded-md transition-colors"
+                  >
+                    <Gift className="w-4 h-4" />
+                    推荐好友
+                  </button>
 
                   <button
                     onClick={async () => {
@@ -157,6 +161,11 @@ export function UserMenu({ onHistoryClick, onReferralClick }: UserMenuProps) {
           )}
         </AnimatePresence>
       </div>
+
+      <ReferralModal
+        isOpen={showReferralModal}
+        onClose={() => setShowReferralModal(false)}
+      />
     </div>
   );
 }
