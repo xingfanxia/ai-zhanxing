@@ -3,7 +3,12 @@
 import { useState, useEffect, use } from "react";
 import { Link } from "@/i18n/routing";
 import { motion } from "framer-motion";
-import { ArrowLeft, Sparkles, Loader2, Save, BookOpen } from "lucide-react";
+import { ArrowLeft, Sparkles, Loader2, Save, BookOpen, Download } from "lucide-react";
+import dynamic from "next/dynamic";
+
+// Dynamically import PDF components to avoid SSR issues
+const ExportButton = dynamic(() => import("@/components/pdf/ExportButton").then(mod => mod.ExportButton), { ssr: false });
+const TarotPDF = dynamic(() => import("@/components/pdf/TarotPDF").then(mod => mod.TarotPDF), { ssr: false });
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChatInterface } from "@/components/chat/ChatInterface";
@@ -428,30 +433,53 @@ export default function TarotResultPage({
                   {t("interpretation.overallMessage")}
                 </span>
                 {interpretation && (
-                  <Button
-                    variant="mystical-outline"
-                    size="sm"
-                    onClick={handleSaveReading}
-                    disabled={isSaving}
-                    className="border-pink-500/30 hover:border-pink-500/50"
-                  >
-                    {isSaving ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        {tCommon("loading")}
-                      </>
-                    ) : savedReadingId ? (
-                      <>
-                        <Save className="w-4 h-4 mr-2" />
-                        {tCommon("edit")}
-                      </>
-                    ) : (
-                      <>
-                        <Save className="w-4 h-4 mr-2" />
-                        {tCommon("save")}
-                      </>
-                    )}
-                  </Button>
+                  <div className="flex gap-2">
+                    <ExportButton
+                      document={
+                        <TarotPDF
+                          cards={readingData?.cards?.map(c => ({
+                            name: c.name,
+                            position: c.position,
+                            reversed: c.reversed,
+                            keywords: c.keywords,
+                            upright: c.meaning,
+                            reversedMeaning: c.meaning,
+                          })) || []}
+                          question={readingData?.question}
+                          spreadType={readingData?.spreadType || 'three_card'}
+                          interpretation={interpretation}
+                        />
+                      }
+                      fileName={`tarot-reading-${new Date().toISOString().split('T')[0]}.pdf`}
+                      label="Export PDF"
+                      variant="outline"
+                      className="border-pink-500/50 text-pink-300 hover:bg-pink-500/10"
+                    />
+                    <Button
+                      variant="mystical-outline"
+                      size="sm"
+                      onClick={handleSaveReading}
+                      disabled={isSaving}
+                      className="border-pink-500/30 hover:border-pink-500/50"
+                    >
+                      {isSaving ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          {tCommon("loading")}
+                        </>
+                      ) : savedReadingId ? (
+                        <>
+                          <Save className="w-4 h-4 mr-2" />
+                          {tCommon("edit")}
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-4 h-4 mr-2" />
+                          {tCommon("save")}
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 )}
               </CardTitle>
             </CardHeader>

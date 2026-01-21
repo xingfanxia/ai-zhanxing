@@ -1,0 +1,183 @@
+"use client";
+
+import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+
+const styles = StyleSheet.create({
+  page: {
+    padding: 40,
+    backgroundColor: '#1e293b',
+    color: '#f1f5f9',
+    fontFamily: 'Helvetica',
+  },
+  header: {
+    marginBottom: 20,
+    borderBottom: '2px solid #8b5cf6',
+    paddingBottom: 15,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#c4b5fd',
+    marginBottom: 5,
+  },
+  subtitle: {
+    fontSize: 12,
+    color: '#94a3b8',
+  },
+  section: {
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#a78bfa',
+    marginBottom: 10,
+    borderBottom: '1px solid #475569',
+    paddingBottom: 5,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 4,
+    borderBottom: '1px solid #334155',
+  },
+  label: {
+    fontSize: 11,
+    color: '#94a3b8',
+  },
+  value: {
+    fontSize: 11,
+    color: '#f1f5f9',
+    fontWeight: 'bold',
+  },
+  aspectsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  aspectItem: {
+    backgroundColor: '#334155',
+    padding: 6,
+    borderRadius: 4,
+    fontSize: 9,
+    color: '#e2e8f0',
+    width: '48%',
+  },
+  interpretation: {
+    fontSize: 10,
+    lineHeight: 1.5,
+    color: '#cbd5e1',
+    marginTop: 10,
+    padding: 15,
+    backgroundColor: '#334155',
+    borderRadius: 6,
+  },
+  footer: {
+    position: 'absolute',
+    bottom: 30,
+    left: 40,
+    right: 40,
+    textAlign: 'center',
+    fontSize: 8,
+    color: '#64748b',
+  },
+});
+
+interface AstrologyPDFProps {
+  chartData: {
+    planets: Record<string, { sign: string; longitude: number; house?: number; retrograde?: boolean }>;
+    houses?: { cusps: number[] };
+    ascendant?: { sign: string; degree: number };
+    midheaven?: { sign: string; degree: number };
+    aspects?: Array<{ planet1: string; planet2: string; type: string; orb: number }>;
+  };
+  birthData: {
+    date: string;
+    time: string | null;
+    city?: string;
+  };
+  interpretation?: string;
+  name?: string;
+}
+
+export function AstrologyPDF({ chartData, birthData, interpretation, name }: AstrologyPDFProps) {
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  };
+
+  return (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>{name || 'Birth Chart'}</Text>
+          <Text style={styles.subtitle}>
+            {formatDate(birthData.date)} at {birthData.time || '12:00'} · {birthData.city || 'Unknown location'}
+          </Text>
+        </View>
+
+        {/* Big Three */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>The Big Three</Text>
+          <View style={styles.row}>
+            <Text style={styles.label}>Sun Sign</Text>
+            <Text style={styles.value}>{chartData.planets.Sun?.sign || 'N/A'}</Text>
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>Moon Sign</Text>
+            <Text style={styles.value}>{chartData.planets.Moon?.sign || 'N/A'}</Text>
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>Rising Sign</Text>
+            <Text style={styles.value}>{chartData.ascendant?.sign || 'N/A'}</Text>
+          </View>
+        </View>
+
+        {/* Planetary Positions */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Planetary Positions</Text>
+          {Object.entries(chartData.planets).map(([planet, data]) => (
+            <View key={planet} style={styles.row}>
+              <Text style={styles.label}>
+                {planet} {data.retrograde ? '℞' : ''}
+              </Text>
+              <Text style={styles.value}>
+                {data.sign} {data.house ? `(House ${data.house})` : ''}
+              </Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Aspects */}
+        {chartData.aspects && chartData.aspects.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Major Aspects</Text>
+            <View style={styles.aspectsGrid}>
+              {chartData.aspects.slice(0, 12).map((aspect, idx) => (
+                <View key={idx} style={styles.aspectItem}>
+                  <Text>{aspect.planet1} {aspect.type} {aspect.planet2} ({aspect.orb.toFixed(1)}°)</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {/* Interpretation */}
+        {interpretation && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>AI Interpretation</Text>
+            <Text style={styles.interpretation}>{interpretation}</Text>
+          </View>
+        )}
+
+        {/* Footer */}
+        <Text style={styles.footer}>
+          Generated by AI Zhanxing · astro.ax0x.ai
+        </Text>
+      </Page>
+    </Document>
+  );
+}
+
+export default AstrologyPDF;

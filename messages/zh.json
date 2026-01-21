@@ -200,6 +200,41 @@
         "hopesAndFears": "希望与恐惧",
         "finalOutcome": "最终结果"
       }
+    },
+    "horseshoe": {
+      "name": "马蹄形牌阵",
+      "description": "七牌阵，探索过去、现在、未来以及你周围的动态关系",
+      "positions": {
+        "past": "过去",
+        "present": "现在",
+        "future": "未来",
+        "yourApproach": "你的态度",
+        "othersAttitudes": "他人态度",
+        "whatToDo": "应该做什么",
+        "outcome": "结果"
+      }
+    },
+    "star": {
+      "name": "星星牌阵",
+      "description": "六牌阵，深入解决问题并揭示隐藏的方面",
+      "positions": {
+        "issueAtHeart": "核心问题",
+        "whatYouNeed": "你需要什么",
+        "whatYouDontKnow": "你不知道的",
+        "rootOfIssue": "问题根源",
+        "whatYouCanChange": "可以改变的",
+        "resolution": "解决方案"
+      }
+    },
+    "wheelOfFortune": {
+      "name": "命运之轮牌阵",
+      "description": "四牌阵，揭示过去影响、现状、未来方向和命运启示",
+      "positions": {
+        "pastInfluence": "过去影响",
+        "presentState": "现状",
+        "futureDirection": "未来方向",
+        "fatesMessage": "命运启示"
+      }
     }
   },
   "Readings": {
@@ -334,6 +369,61 @@
     "calculationError": "计算星盘时出错，请核实你的出生信息。",
     "aiError": "AI解读暂时不可用，请稍后重试。",
     "sessionExpired": "你的会话已过期，请重新登录。"
+  },
+  "Oracle": {
+    "title": "是/否神谕",
+    "description": "提出一个是或否的问题，让塔罗牌揭示答案",
+    "form": {
+      "question": "你的问题",
+      "questionPlaceholder": "我应该抓住这个机会吗？",
+      "questionDescription": "专注于一个明确的是/否问题以获得最准确的指引"
+    },
+    "buttons": {
+      "ask": "询问神谕",
+      "consulting": "正在咨询塔罗牌...",
+      "askAnother": "再问一个问题"
+    },
+    "result": {
+      "yourQuestion": "你的问题",
+      "yes": "是",
+      "no": "否",
+      "maybe": "不确定",
+      "strongConfidence": "塔罗牌给出了明确的答案",
+      "moderateConfidence": "塔罗牌暗示了这个答案",
+      "uncertainConfidence": "道路尚未明朗",
+      "reversed": "逆位"
+    }
+  },
+  "Synastry": {
+    "title": "合盘分析",
+    "subtitle": "通过星象探索关系兼容性",
+    "description": "比较两个人的星盘，发现两个灵魂之间的宇宙连接",
+    "form": {
+      "person1": "第一个人",
+      "person2": "第二个人",
+      "name": "姓名",
+      "namePlaceholder": "输入姓名",
+      "birthDate": "出生日期",
+      "birthTime": "出生时间",
+      "birthPlace": "出生地点"
+    },
+    "buttons": {
+      "calculate": "计算兼容性",
+      "calculating": "正在分析宇宙连接..."
+    },
+    "result": {
+      "overallScore": "整体兼容性",
+      "emotional": "情感",
+      "romantic": "浪漫",
+      "physical": "身体",
+      "communication": "沟通",
+      "growth": "成长",
+      "stability": "稳定性",
+      "keyAspects": "关键相位",
+      "harmonious": "和谐",
+      "challenging": "挑战",
+      "neutral": "中性"
+    }
   },
   "Meta": {
     "title": "AI占星 - 占星与塔罗",

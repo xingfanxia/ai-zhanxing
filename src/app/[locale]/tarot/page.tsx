@@ -14,6 +14,9 @@ const spreadTypeKeys = [
   { value: "single", key: "single", cards: 1 },
   { value: "three_card", key: "threeCard", cards: 3 },
   { value: "celtic_cross", key: "celticCross", cards: 10 },
+  { value: "horseshoe", key: "horseshoe", cards: 7 },
+  { value: "star", key: "star", cards: 6 },
+  { value: "wheel_of_fortune", key: "wheelOfFortune", cards: 4 },
 ];
 
 export default function TarotPage() {

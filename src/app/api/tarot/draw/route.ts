@@ -29,7 +29,10 @@ type SpreadType =
   | 'relationship'
   | 'career'
   | 'yes-no'
-  | 'horseshoe';
+  | 'horseshoe'
+  | 'star'
+  | 'wheel_of_fortune'
+  | 'wheel-of-fortune';
 
 // Request body type
 interface DrawRequest {
@@ -75,6 +78,8 @@ function normalizeSpreadType(type: string): string {
     'celtic_cross': 'celtic-cross',
     'yes-no': 'yes-no',
     'yes_no': 'yes-no',
+    'wheel-of-fortune': 'wheel-of-fortune',
+    'wheel_of_fortune': 'wheel-of-fortune',
   };
   return aliases[normalized] || normalized;
 }
@@ -169,6 +174,9 @@ export async function POST(request: NextRequest) {
             'career',
             'yes-no',
             'horseshoe',
+            'star',
+            'wheel_of_fortune',
+            'wheel-of-fortune',
           ],
         },
         { status: 400 }

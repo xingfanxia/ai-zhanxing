@@ -200,6 +200,41 @@
         "hopesAndFears": "Hopes and Fears",
         "finalOutcome": "Final Outcome"
       }
+    },
+    "horseshoe": {
+      "name": "Horseshoe Spread",
+      "description": "A 7-card spread exploring past, present, future, and the dynamics around your situation",
+      "positions": {
+        "past": "Past",
+        "present": "Present",
+        "future": "Future",
+        "yourApproach": "Your Approach",
+        "othersAttitudes": "Others' Attitudes",
+        "whatToDo": "What to Do",
+        "outcome": "Outcome"
+      }
+    },
+    "star": {
+      "name": "Star Spread",
+      "description": "A 6-card spread for deep problem-solving and uncovering hidden aspects of an issue",
+      "positions": {
+        "issueAtHeart": "Issue at Heart",
+        "whatYouNeed": "What You Need",
+        "whatYouDontKnow": "What You Don't Know",
+        "rootOfIssue": "Root of Issue",
+        "whatYouCanChange": "What You Can Change",
+        "resolution": "Resolution"
+      }
+    },
+    "wheelOfFortune": {
+      "name": "Wheel of Fortune",
+      "description": "A 4-card spread revealing past influences, present state, future direction, and fate's message",
+      "positions": {
+        "pastInfluence": "Past Influence",
+        "presentState": "Present State",
+        "futureDirection": "Future Direction",
+        "fatesMessage": "Fate's Message"
+      }
     }
   },
   "Readings": {
@@ -334,6 +369,61 @@
     "calculationError": "Error calculating chart. Please verify your birth details.",
     "aiError": "AI interpretation unavailable. Please try again later.",
     "sessionExpired": "Your session has expired. Please sign in again."
+  },
+  "Oracle": {
+    "title": "Yes/No Oracle",
+    "description": "Ask a yes or no question and let the cards reveal the answer",
+    "form": {
+      "question": "Your Question",
+      "questionPlaceholder": "Should I take this opportunity?",
+      "questionDescription": "Focus on a clear yes/no question for the most accurate guidance"
+    },
+    "buttons": {
+      "ask": "Ask the Oracle",
+      "consulting": "Consulting the cards...",
+      "askAnother": "Ask Another Question"
+    },
+    "result": {
+      "yourQuestion": "Your Question",
+      "yes": "YES",
+      "no": "NO",
+      "maybe": "MAYBE",
+      "strongConfidence": "The cards speak with strong certainty",
+      "moderateConfidence": "The cards suggest this answer",
+      "uncertainConfidence": "The path is not yet clear",
+      "reversed": "Reversed"
+    }
+  },
+  "Synastry": {
+    "title": "Synastry Chart",
+    "subtitle": "Explore relationship compatibility through the stars",
+    "description": "Compare two birth charts to discover the cosmic connection between two souls",
+    "form": {
+      "person1": "Person 1",
+      "person2": "Person 2",
+      "name": "Name",
+      "namePlaceholder": "Enter name",
+      "birthDate": "Birth Date",
+      "birthTime": "Birth Time",
+      "birthPlace": "Birth Place"
+    },
+    "buttons": {
+      "calculate": "Calculate Compatibility",
+      "calculating": "Analyzing cosmic connections..."
+    },
+    "result": {
+      "overallScore": "Overall Compatibility",
+      "emotional": "Emotional",
+      "romantic": "Romantic",
+      "physical": "Physical",
+      "communication": "Communication",
+      "growth": "Growth",
+      "stability": "Stability",
+      "keyAspects": "Key Aspects",
+      "harmonious": "Harmonious",
+      "challenging": "Challenging",
+      "neutral": "Neutral"
+    }
   },
   "Meta": {
     "title": "AI Zhanxing - Astrology & Tarot",

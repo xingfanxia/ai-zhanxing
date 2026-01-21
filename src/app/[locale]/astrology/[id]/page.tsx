@@ -3,7 +3,12 @@
 import { useState, useEffect, use, useMemo } from "react";
 import { Link } from "@/i18n/routing";
 import { motion } from "framer-motion";
-import { ArrowLeft, Sparkles, Loader2, Sun, Moon, Save, BookOpen } from "lucide-react";
+import { ArrowLeft, Sparkles, Loader2, Sun, Moon, Save, BookOpen, Download } from "lucide-react";
+import dynamic from "next/dynamic";
+
+// Dynamically import PDF components to avoid SSR issues
+const ExportButton = dynamic(() => import("@/components/pdf/ExportButton").then(mod => mod.ExportButton), { ssr: false });
+const AstrologyPDF = dynamic(() => import("@/components/pdf/AstrologyPDF").then(mod => mod.AstrologyPDF), { ssr: false });
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChatInterface } from "@/components/chat/ChatInterface";
@@ -564,29 +569,54 @@ export default function AstrologyResultPage({
                   {t("sections.interpretation")}
                 </span>
                 {interpretation && (
-                  <Button
-                    variant="mystical-outline"
-                    size="sm"
-                    onClick={handleSaveReading}
-                    disabled={isSaving}
-                  >
-                    {isSaving ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        {tCommon("loading")}
-                      </>
-                    ) : savedReadingId ? (
-                      <>
-                        <Save className="w-4 h-4 mr-2" />
-                        {tCommon("edit")}
-                      </>
-                    ) : (
-                      <>
-                        <Save className="w-4 h-4 mr-2" />
-                        {tCommon("save")}
-                      </>
-                    )}
-                  </Button>
+                  <div className="flex gap-2">
+                    <ExportButton
+                      document={
+                        <AstrologyPDF
+                          chartData={{
+                            planets: chartData?.planets?.reduce((acc, p) => ({
+                              ...acc,
+                              [p.name]: { sign: p.sign, longitude: 0, house: p.house, retrograde: p.retrograde }
+                            }), {}),
+                            aspects: chartData?.aspects,
+                          }}
+                          birthData={{
+                            date: chartData?.birthDate || '',
+                            time: chartData?.birthTime || null,
+                            city: chartData?.location?.city,
+                          }}
+                          interpretation={interpretation}
+                        />
+                      }
+                      fileName={`birth-chart-${chartData?.birthDate || 'chart'}.pdf`}
+                      label="Export PDF"
+                      variant="outline"
+                      className="border-purple-500/50 text-purple-300 hover:bg-purple-500/10"
+                    />
+                    <Button
+                      variant="mystical-outline"
+                      size="sm"
+                      onClick={handleSaveReading}
+                      disabled={isSaving}
+                    >
+                      {isSaving ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          {tCommon("loading")}
+                        </>
+                      ) : savedReadingId ? (
+                        <>
+                          <Save className="w-4 h-4 mr-2" />
+                          {tCommon("edit")}
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-4 h-4 mr-2" />
+                          {tCommon("save")}
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 )}
               </CardTitle>
             </CardHeader>

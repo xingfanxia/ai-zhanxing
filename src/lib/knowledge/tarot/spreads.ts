@@ -127,15 +127,45 @@ export const horseshoeSpread: TarotSpread = {
   name: { en: 'Horseshoe Spread', zh: '马蹄形牌阵', ja: '馬蹄形スプレッド' },
   cardCount: 7,
   positions: [
-    { number: 1, name: { en: 'Past', zh: '过去', ja: '過去' }, meaning: 'Past events and root causes' },
+    { number: 1, name: { en: 'Past', zh: '过去', ja: '過去' }, meaning: 'Past influences and events' },
     { number: 2, name: { en: 'Present', zh: '现在', ja: '現在' }, meaning: 'Current situation' },
-    { number: 3, name: { en: 'Hidden Influences', zh: '隐藏影响', ja: '隠れた影響' }, meaning: 'Unseen factors' },
-    { number: 4, name: { en: 'Obstacles', zh: '障碍', ja: '障害' }, meaning: 'Challenges to face' },
-    { number: 5, name: { en: 'External Influences', zh: '外部影响', ja: '外部の影響' }, meaning: "Others' attitudes" },
-    { number: 6, name: { en: 'Advice', zh: '建议', ja: 'アドバイス' }, meaning: 'Recommended action' },
+    { number: 3, name: { en: 'Future', zh: '未来', ja: '未来' }, meaning: 'What lies ahead' },
+    { number: 4, name: { en: 'Your Approach', zh: '你的态度', ja: 'あなたのアプローチ' }, meaning: 'How you are handling the situation' },
+    { number: 5, name: { en: "Others' Attitudes", zh: '他人态度', ja: '他者の態度' }, meaning: "How others perceive and affect you" },
+    { number: 6, name: { en: 'What to Do', zh: '应该做什么', ja: 'すべきこと' }, meaning: 'Recommended course of action' },
     { number: 7, name: { en: 'Outcome', zh: '结果', ja: '結果' }, meaning: 'Final resolution' }
   ],
   bestFor: ['Specific problems', 'Multi-faceted situations', 'General guidance']
+};
+
+/** Star Spread */
+export const starSpread: TarotSpread = {
+  id: 'star',
+  name: { en: 'Star Spread', zh: '星星牌阵', ja: '星のスプレッド' },
+  cardCount: 6,
+  positions: [
+    { number: 1, name: { en: 'Issue at Heart', zh: '核心问题', ja: '核心の問題' }, meaning: 'The central matter at hand' },
+    { number: 2, name: { en: 'What You Need', zh: '你需要什么', ja: '必要なこと' }, meaning: 'What is required for resolution' },
+    { number: 3, name: { en: "What You Don't Know", zh: '你不知道的', ja: '知らないこと' }, meaning: 'Hidden information or blind spots' },
+    { number: 4, name: { en: 'Root of Issue', zh: '问题根源', ja: '問題の根源' }, meaning: 'The underlying cause' },
+    { number: 5, name: { en: 'What You Can Change', zh: '可以改变的', ja: '変えられること' }, meaning: 'Areas within your control' },
+    { number: 6, name: { en: 'Resolution', zh: '解决方案', ja: '解決策' }, meaning: 'How the matter may resolve' }
+  ],
+  bestFor: ['Deep insight', 'Problem solving', 'Self-reflection']
+};
+
+/** Wheel of Fortune Spread */
+export const wheelOfFortuneSpread: TarotSpread = {
+  id: 'wheel-of-fortune',
+  name: { en: 'Wheel of Fortune', zh: '命运之轮牌阵', ja: '運命の輪スプレッド' },
+  cardCount: 4,
+  positions: [
+    { number: 1, name: { en: 'Past Influence', zh: '过去影响', ja: '過去の影響' }, meaning: 'What has shaped your current situation' },
+    { number: 2, name: { en: 'Present State', zh: '现状', ja: '現在の状態' }, meaning: 'Where you stand now' },
+    { number: 3, name: { en: 'Future Direction', zh: '未来方向', ja: '未来の方向' }, meaning: 'Where you are headed' },
+    { number: 4, name: { en: "Fate's Message", zh: '命运启示', ja: '運命のメッセージ' }, meaning: "The universe's guidance for you" }
+  ],
+  bestFor: ['Understanding life cycles', 'Fate and destiny questions', 'Quick comprehensive overview']
 };
 
 /** All spreads collection */
@@ -146,5 +176,7 @@ export const allSpreads = [
   relationshipSpread,
   careerSpread,
   yesNoSpread,
-  horseshoeSpread
+  horseshoeSpread,
+  starSpread,
+  wheelOfFortuneSpread
 ];
