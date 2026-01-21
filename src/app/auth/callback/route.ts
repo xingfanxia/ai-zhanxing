@@ -53,6 +53,10 @@ export async function GET(request: Request) {
         const meta = data.user.user_metadata;
         await linkReferral(supabase, data.user.id, meta?.referral_code, meta?.source_app);
       }
+      // For password recovery, always redirect to update-password page
+      if (type === 'recovery') {
+        return NextResponse.redirect(`${origin}/auth/update-password`);
+      }
       return NextResponse.redirect(`${origin}${next}`);
     }
   }
