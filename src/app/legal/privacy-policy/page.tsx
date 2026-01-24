@@ -2,60 +2,38 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import fs from 'fs';
 import path from 'path';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
 
 export const metadata: Metadata = {
   title: '隐私政策 - AI占星',
   description: '了解我们如何收集、使用和保护您的个人信息',
 };
 
-// Simple markdown to HTML converter for basic formatting
-// SECURITY NOTE: Content is from our own static files in public/legal/, not user input.
-// This is safe because we control the source markdown files.
-function markdownToHtml(markdown: string): string {
-  let html = markdown
-    // Escape HTML first to prevent any injection
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    // Restore HTML tags we want to keep (div, table, etc.)
-    .replace(/&lt;div/g, '<div')
-    .replace(/&lt;\/div&gt;/g, '</div>')
-    .replace(/style="([^"]*)"/g, 'style="$1"')
-    // Headers
-    .replace(/^### (.*$)/gim, '<h3 class="text-lg font-semibold mt-6 mb-3 text-slate-200">$1</h3>')
-    .replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold mt-8 mb-4 text-white border-b pb-2 border-purple-500/30">$1</h2>')
-    .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold mt-8 mb-4 text-white">$1</h1>')
-    // Bold
-    .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-purple-300">$1</strong>')
-    // Italic
-    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    // Links
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-purple-400 hover:underline" target="_blank" rel="noopener noreferrer">$1</a>')
-    // Tables - basic support
-    .replace(/\|(.+)\|/g, (match) => {
-      const cells = match.split('|').filter(Boolean).map(cell => cell.trim());
-      if (cells.every(cell => cell.match(/^-+$/))) {
-        return ''; // Skip separator row
-      }
-      const isHeader = cells.some(cell => cell.includes('---'));
-      if (isHeader) return '';
-      return `<tr class="border-b border-purple-500/20">${cells.map(cell =>
-        `<td class="px-4 py-2 text-sm">${cell}</td>`
-      ).join('')}</tr>`;
-    })
-    // Horizontal rule
-    .replace(/^---$/gim, '<hr class="my-6 border-purple-500/30" />')
-    // Line breaks
-    .replace(/\n\n/g, '</p><p class="mb-4 text-slate-300 leading-relaxed">')
-    // List items
-    .replace(/^- (.*$)/gim, '<li class="ml-4 mb-1 text-slate-300">$1</li>')
-    // Numbered list items
-    .replace(/^\d+\. (.*$)/gim, '<li class="ml-4 mb-1 text-slate-300 list-decimal">$1</li>');
-
-  // Wrap in paragraph
-  html = `<p class="mb-4 text-slate-300 leading-relaxed">${html}</p>`;
-
-  return html;
+// Transform inline styles to Tailwind dark mode compatible classes
+function transformCallouts(markdown: string): string {
+  return markdown
+    // Green callout boxes (security/positive info)
+    .replace(
+      /<div style="background: rgba\(76, 175, 80, 0\.15\); border: 2px solid rgba\(76, 175, 80, 0\.5\); padding: 20px; border-radius: 12px; margin: 20px 0;">/g,
+      '<div class="bg-green-500/15 border-2 border-green-500/50 p-5 rounded-xl my-5">'
+    )
+    // Yellow/warning callout boxes
+    .replace(
+      /<div style="background: rgba\(255, 193, 7, 0\.15\); border: 2px solid rgba\(255, 193, 7, 0\.5\); padding: 20px; border-radius: 12px; margin: 20px 0;">/g,
+      '<div class="bg-yellow-500/15 border-2 border-yellow-500/50 p-5 rounded-xl my-5">'
+    )
+    // Blue/info callout boxes
+    .replace(
+      /<div style="background: rgba\(33, 150, 243, 0\.15\); border: 2px solid rgba\(33, 150, 243, 0\.5\); padding: 20px; border-radius: 12px; margin: 20px 0;">/g,
+      '<div class="bg-blue-500/15 border-2 border-blue-500/50 p-5 rounded-xl my-5">'
+    )
+    // Red/danger callout boxes
+    .replace(
+      /<div style="background: rgba\(244, 67, 54, 0\.15\); border: 2px solid rgba\(244, 67, 54, 0\.5\); padding: 20px; border-radius: 12px; margin: 20px 0;">/g,
+      '<div class="bg-red-500/15 border-2 border-red-500/50 p-5 rounded-xl my-5">'
+    );
 }
 
 export default async function PrivacyPolicyPage() {
@@ -71,9 +49,8 @@ export default async function PrivacyPolicyPage() {
     content = '# Privacy Policy\n\nContent loading error. Please try again later.';
   }
 
-  // SECURITY NOTE: htmlContent is derived from our own static markdown files,
-  // not from user input. The markdownToHtml function also escapes HTML entities first.
-  const htmlContent = markdownToHtml(content);
+  // Transform inline styles to Tailwind classes for dark mode compatibility
+  const transformedContent = transformCallouts(content);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-purple-950/20 to-slate-950">
@@ -102,13 +79,16 @@ export default async function PrivacyPolicyPage() {
         </div>
       </header>
 
-      {/* Content - Safe: rendered from our own static markdown files, HTML escaped */}
+      {/* Content */}
       <main className="max-w-4xl mx-auto px-4 py-8">
-        <article
-          className="prose prose-invert max-w-none"
-          // Safe: content is from static files we control, with HTML escaping applied
-          dangerouslySetInnerHTML={{ __html: htmlContent }}
-        />
+        <article className="prose prose-invert prose-purple max-w-none prose-headings:text-white prose-h1:text-2xl prose-h2:text-xl prose-h2:border-b prose-h2:border-purple-500/30 prose-h2:pb-2 prose-h3:text-lg prose-p:text-slate-300 prose-p:leading-relaxed prose-strong:text-purple-300 prose-a:text-purple-400 prose-li:text-slate-300 prose-table:border-collapse prose-th:border prose-th:border-purple-500/30 prose-th:bg-purple-500/10 prose-th:px-4 prose-th:py-2 prose-td:border prose-td:border-purple-500/20 prose-td:px-4 prose-td:py-2 prose-hr:border-purple-500/30">
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeRaw]}
+          >
+            {transformedContent}
+          </ReactMarkdown>
+        </article>
       </main>
 
       {/* Footer */}
