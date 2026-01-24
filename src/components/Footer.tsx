@@ -70,6 +70,11 @@ export function Footer() {
             ))}
           </div>
 
+          {/* WeChat Support */}
+          <div className="text-slate-500 text-sm font-medium">
+            客服微信: Panpanmao_001 来加群
+          </div>
+
           {/* Credit */}
           <div className="text-slate-600 text-xs">
             Made by AX & Claude Code
