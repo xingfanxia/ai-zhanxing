@@ -44,7 +44,7 @@ export function Footer() {
               className="rounded-full ring-1 ring-purple-500/30"
             />
             <span className="text-slate-400 text-sm font-medium">
-              盘盘猫 Panpan Mao Entertainment
+              Panpanmao科技 Panpanmao Technology
             </span>
           </div>
 

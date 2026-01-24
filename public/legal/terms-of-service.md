@@ -1,8 +1,8 @@
 # 服务条款 / Terms of Service
 
-**生效日期 / Effective Date**: [YYYY-MM-DD]
+**生效日期 / Effective Date**: 2026-01-24
 
-**最后更新 / Last Updated**: [YYYY-MM-DD]
+**最后更新 / Last Updated**: 2026-01-24
 
 ---
 
@@ -56,7 +56,7 @@ This service uses Large Language Model (LLM) technology, including Google Gemini
 
 ### 2.1 娱乐目的声明 / Entertainment Purpose Statement
 
-<div style="background: #fff3cd; border: 2px solid #ffc107; padding: 16px; border-radius: 8px; margin: 16px 0;">
+<div style="background: rgba(255, 193, 7, 0.15); border: 2px solid rgba(255, 193, 7, 0.5); padding: 16px; border-radius: 8px; margin: 16px 0;">
 
 **重要提示 / IMPORTANT NOTICE**
 

@@ -1,8 +1,8 @@
 # 隐私政策 / Privacy Policy
 
-**生效日期 / Effective Date**: [YYYY-MM-DD]
+**生效日期 / Effective Date**: 2026-01-24
 
-**最后更新 / Last Updated**: [YYYY-MM-DD]
+**最后更新 / Last Updated**: 2026-01-24
 
 ---
 
@@ -24,7 +24,7 @@ Welcome to our AI Personality Assessment and Metaphysical Services platform (the
 
 ## 数据安全保障 / Data Security Measures
 
-<div style="background: #e8f5e9; border: 2px solid #4caf50; padding: 20px; border-radius: 12px; margin: 20px 0;">
+<div style="background: rgba(76, 175, 80, 0.15); border: 2px solid rgba(76, 175, 80, 0.5); padding: 20px; border-radius: 12px; margin: 20px 0;">
 
 **我们如何保护您的隐私？/ How do we protect your privacy?**
 
@@ -69,7 +69,7 @@ We understand your privacy concerns. Here are the specific technical measures we
 
 ### 5. 用户控制权 / User Control
 
-<div style="background: #e3f2fd; border: 1px solid #2196f3; padding: 16px; border-radius: 8px; margin: 16px 0;">
+<div style="background: rgba(33, 150, 243, 0.15); border: 1px solid rgba(33, 150, 243, 0.5); padding: 16px; border-radius: 8px; margin: 16px 0;">
 
 **您对自己的数据拥有完全控制权 / You have complete control over your data:**
 
