@@ -10,10 +10,11 @@
 
 // Constants for validation limits
 export const VALIDATION_LIMITS = {
-  MAX_MESSAGE_LENGTH: 2000,
+  MAX_MESSAGE_LENGTH: 4000,
   MAX_QUESTION_LENGTH: 500,
   MAX_LOCATION_LENGTH: 200,
-  MAX_REQUEST_BODY_SIZE: 50 * 1024, // 50KB
+  MAX_REQUEST_BODY_SIZE: 500 * 1024, // 500KB
+  MAX_CONVERSATION_HISTORY: 30,
 } as const;
 
 // Common XSS patterns to strip
