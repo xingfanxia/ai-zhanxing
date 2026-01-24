@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { Star } from "lucide-react";
 
 const sisterApps = [
@@ -68,6 +69,23 @@ export function Footer() {
                 )}
               </a>
             ))}
+          </div>
+
+          {/* Legal Links */}
+          <div className="flex justify-center gap-4 text-xs">
+            <Link
+              href="/legal/privacy-policy"
+              className="text-slate-500 hover:text-purple-300 transition-colors"
+            >
+              隐私政策
+            </Link>
+            <span className="text-slate-600">|</span>
+            <Link
+              href="/legal/terms-of-service"
+              className="text-slate-500 hover:text-purple-300 transition-colors"
+            >
+              服务条款
+            </Link>
           </div>
 
           {/* WeChat Support */}

@@ -5,6 +5,7 @@ import { routing } from "@/i18n/routing";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { ReferralBonusToast } from "@/components/auth/ReferralBonusToast";
 import { ReferralProvider } from "@/components/referral";
+import { ConsentProvider } from "@/components/ConsentProvider";
 import type { Locale } from "@/i18n/config";
 
 export function generateStaticParams() {
@@ -36,7 +37,9 @@ export default async function LocaleLayout({
       <AuthProvider>
         <ReferralBonusToast />
         <ReferralProvider appName="占星猫" sourceApp="zhanxing">
-          {children}
+          <ConsentProvider>
+            {children}
+          </ConsentProvider>
         </ReferralProvider>
       </AuthProvider>
     </NextIntlClientProvider>
