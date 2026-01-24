@@ -32,6 +32,9 @@ export function useConsent({ user, isAuthLoading }: UseConsentOptions): UseConse
 
   /**
    * Check consent status from localStorage and/or server
+   *
+   * For logged-in users: ALWAYS check server first (enables cross-app consent sharing)
+   * For anonymous users: use localStorage only
    */
   useEffect(() => {
     // Wait for auth to settle
@@ -42,45 +45,65 @@ export function useConsent({ user, isAuthLoading }: UseConsentOptions): UseConse
     const checkConsent = async () => {
       setIsLoading(true);
 
-      // Check localStorage first
-      const localConsent = localStorage.getItem(STORAGE_KEY);
-      if (localConsent) {
-        setHasConsented(true);
-        setIsLoading(false);
-
-        // If user is logged in but has local consent, sync to server
-        if (user) {
-          syncConsentToServer(localConsent);
-        }
-        return;
-      }
-
-      // If logged in, check server
+      // For logged-in users: check server FIRST (enables cross-subdomain consent sharing)
       if (user) {
         try {
           const response = await fetch('/api/user/consent');
           if (response.ok) {
             const data = await response.json();
             if (data.tosAcceptedAt) {
-              // User has consented, update local
+              // User has consented (in any app), update localStorage for faster checks
               localStorage.setItem(STORAGE_KEY, data.tosAcceptedAt);
               setHasConsented(true);
               setIsLoading(false);
               return;
             }
+          } else {
+            // API returned error - log but don't fall through to showing modal
+            console.error('[useConsent] API returned non-ok status:', response.status);
           }
         } catch (error) {
           console.error('[useConsent] Failed to check server consent:', error);
+          // On error, check localStorage as fallback (don't show modal unnecessarily)
+          const localConsent = localStorage.getItem(STORAGE_KEY);
+          if (localConsent) {
+            setHasConsented(true);
+            setIsLoading(false);
+            return;
+          }
         }
+
+        // Check localStorage fallback for logged-in users
+        // (in case server check failed but they have local consent)
+        const localConsent = localStorage.getItem(STORAGE_KEY);
+        if (localConsent) {
+          setHasConsented(true);
+          setIsLoading(false);
+          // Try to sync to server in background
+          syncConsentToServer(localConsent);
+          return;
+        }
+
+        // No consent found for logged-in user
+        setHasConsented(false);
+        setIsLoading(false);
+        return;
       }
 
-      // No consent found anywhere
+      // For anonymous users: localStorage only
+      const localConsent = localStorage.getItem(STORAGE_KEY);
+      if (localConsent) {
+        setHasConsented(true);
+        setIsLoading(false);
+        return;
+      }
+
+      // No consent found
       setHasConsented(false);
       setIsLoading(false);
     };
 
     checkConsent();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, isAuthLoading]);
 
   /**
