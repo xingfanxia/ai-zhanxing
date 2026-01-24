@@ -71,8 +71,13 @@ export function Footer() {
           </div>
 
           {/* WeChat Support */}
-          <div className="text-slate-500 text-sm font-medium">
-            客服微信: Panpanmao_001 来加群
+          <div className="text-center space-y-1">
+            <div className="text-purple-400 text-sm font-medium">
+              💬 微信: Panpanmao_001
+            </div>
+            <div className="text-slate-500 text-xs">
+              种子用户群招募中！反馈建议 & 抢先体验新功能
+            </div>
           </div>
 
           {/* Credit */}
