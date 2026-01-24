@@ -18,6 +18,13 @@ import {
 } from '@/lib/knowledge/tarot';
 import { trackEvent, flushPostHog } from '@/lib/posthog';
 import type { GetCreditsResult, DeductCreditResult } from '@/lib/supabase/types';
+import { log } from '@/lib/logger';
+import {
+  checkRateLimit,
+  getClientIP,
+  createRateLimitResponse,
+} from '@/lib/ratelimit';
+import { validateQuestion, sanitizeInput } from '@/lib/validation';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300; // Allow up to 5 minutes for AI generation
@@ -148,6 +155,14 @@ export async function POST(request: NextRequest) {
   let userId: string | undefined;
 
   try {
+    // Apply global rate limit (IP-based)
+    const clientIP = getClientIP(request);
+    const globalRateLimit = await checkRateLimit(clientIP, 'global');
+    if (!globalRateLimit.success) {
+      log.warn('[Tarot Interpret] Rate limit exceeded', { ip: clientIP });
+      return createRateLimitResponse(globalRateLimit);
+    }
+
     // Check authentication
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -160,6 +175,13 @@ export async function POST(request: NextRequest) {
     }
 
     userId = user.id;
+
+    // Apply user-level rate limit
+    const userRateLimit = await checkRateLimit(userId, 'user');
+    if (!userRateLimit.success) {
+      log.warn('[Tarot Interpret] User rate limit exceeded', { userId });
+      return createRateLimitResponse(userRateLimit);
+    }
 
     // Parse request body
     const body = await request.json() as InterpretRequest;
@@ -175,7 +197,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!body.question || typeof body.question !== 'string' || body.question.trim().length < 3) {
+    // Validate and sanitize question
+    const questionValidation = validateQuestion(body.question);
+    if (!questionValidation.valid) {
+      return new Response(
+        JSON.stringify({
+          error: 'Invalid question',
+          message: questionValidation.error || 'Please provide a valid question for the reading',
+        }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+    // Use sanitized question
+    const sanitizedQuestion = questionValidation.sanitized || body.question;
+    if (!sanitizedQuestion || sanitizedQuestion.trim().length < 3) {
       return new Response(
         JSON.stringify({
           error: 'Invalid question',
@@ -183,6 +218,13 @@ export async function POST(request: NextRequest) {
         }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
+    }
+    // Log if suspicious patterns detected
+    if (questionValidation.warnings) {
+      log.warn('[Tarot Interpret] Input validation warnings', {
+        userId,
+        warnings: questionValidation.warnings,
+      });
     }
 
     if (!body.spread_type || typeof body.spread_type !== 'string') {
@@ -211,7 +253,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (deductError) {
-      console.error('Credit deduction error:', deductError);
+      log.error('Credit deduction error:', deductError);
       return new Response(
         JSON.stringify({ error: 'CREDITS_ERROR', message: '扣除额度失败' }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
@@ -246,10 +288,10 @@ export async function POST(request: NextRequest) {
     });
     // ===== END CREDITS CHECK =====
 
-    // Build prompt
+    // Build prompt with sanitized question
     const { systemPrompt, userPrompt } = buildPrompt(
       body.cards,
-      body.question,
+      sanitizedQuestion,
       body.spread_type,
       body.language
     );
@@ -286,7 +328,7 @@ export async function POST(request: NextRequest) {
           reading_type: 'tarot',
           input_data: {
             cards: body.cards,
-            question: body.question,
+            question: sanitizedQuestion,
             spread_type: body.spread_type,
           },
           result_data: {
@@ -305,12 +347,12 @@ export async function POST(request: NextRequest) {
           .single();
 
         if (dbError) {
-          console.error('Failed to save reading:', dbError);
+          log.error('Failed to save reading:', dbError);
         } else if (reading) {
           readingId = (reading as { id: string }).id;
         }
       } catch (saveError) {
-        console.error('Failed to save reading:', saveError);
+        log.error('Failed to save reading:', saveError);
       }
 
       // Track AI interpretation event
@@ -408,7 +450,7 @@ export async function POST(request: NextRequest) {
               reading_type: 'tarot',
               input_data: {
                 cards: body.cards,
-                question: body.question,
+                question: sanitizedQuestion,
                 spread_type: body.spread_type,
               },
               result_data: {
@@ -427,12 +469,12 @@ export async function POST(request: NextRequest) {
               .single();
 
             if (dbError) {
-              console.error('Failed to save reading:', dbError);
+              log.error('Failed to save reading:', dbError);
             } else if (reading) {
               readingId = (reading as { id: string }).id;
             }
           } catch (saveError) {
-            console.error('Failed to save reading:', saveError);
+            log.error('Failed to save reading:', saveError);
           }
 
           // Track AI interpretation event
@@ -453,7 +495,7 @@ export async function POST(request: NextRequest) {
           await flushPostHog();
         } catch (error) {
           streamSuccess = false;
-          console.error('Streaming error:', error);
+          log.error('Streaming error:', error);
           const errorMessage = error instanceof Error ? error.message : 'Streaming error occurred';
           const isEmptyResponse = errorMessage.includes('GEMINI_EMPTY_RESPONSE');
           controller.enqueue(
@@ -484,7 +526,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error('Tarot interpretation error:', error);
+    log.error('Tarot interpretation error:', error);
     return new Response(
       JSON.stringify({ error: 'Internal server error', message: 'Failed to interpret reading' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
