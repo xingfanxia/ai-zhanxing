@@ -107,6 +107,7 @@ export interface GetCreditsResult {
 export interface DeductCreditResult {
   success: boolean;
   remaining_total: number;
+  /** @deprecated Session 58 unified credit pools - daily_credits merged into total_credits. This field is always 0. */
   remaining_daily: number;
   error_message: string | null;
   referral_bonus_claimed: boolean;

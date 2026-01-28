@@ -266,7 +266,7 @@ export async function POST(request: NextRequest) {
         JSON.stringify({
           error: 'NO_CREDITS',
           message: deductResult?.error_message || '额度不足',
-          credits: (deductResult?.remaining_total || 0) + (deductResult?.remaining_daily || 0),
+          credits: deductResult?.remaining_total || 0,
         }),
         { status: 402, headers: { 'Content-Type': 'application/json' } }
       );
@@ -279,7 +279,7 @@ export async function POST(request: NextRequest) {
       action: 'tarot_interpret',
       app: 'zhanxing',
       credits_before: beforeResult?.credits || 0,
-      credits_after: (deductResult.remaining_total || 0) + (deductResult.remaining_daily || 0),
+      credits_after: deductResult.remaining_total || 0,
       metadata: {
         spread_type: body.spread_type,
         card_count: body.cards.length,
@@ -379,7 +379,7 @@ export async function POST(request: NextRequest) {
           provider: providerType,
           usage: response.usage,
         },
-        credits: (deductResult.remaining_total || 0) + (deductResult.remaining_daily || 0),
+        credits: deductResult.remaining_total || 0,
         referralBonusClaimed: deductResult.referral_bonus_claimed || false,
         referralBonusAmount: deductResult.referral_bonus_amount || 0,
       }), {
@@ -422,7 +422,7 @@ export async function POST(request: NextRequest) {
           }
 
           // Send credits event with remaining credits and referral bonus info
-          const remainingCredits = (deductResult.remaining_total || 0) + (deductResult.remaining_daily || 0);
+          const remainingCredits = deductResult.remaining_total || 0;
           const creditsEvent: {
             type: 'credits';
             remaining: number;

@@ -117,7 +117,7 @@ export async function POST(request: Request) {
         {
           error: 'NO_CREDITS',
           message: result.error_message || '额度不足',
-          credits: (result.remaining_total || 0) + (result.remaining_daily || 0),
+          credits: result.remaining_total || 0,
         },
         { status: 402 }
       );
@@ -130,12 +130,12 @@ export async function POST(request: Request) {
       action,
       app,
       credits_before: beforeResult?.credits || 0,
-      credits_after: (result.remaining_total || 0) + (result.remaining_daily || 0),
+      credits_after: result.remaining_total || 0,
       metadata: body.metadata || null,
     });
 
-    // Calculate combined credits (total + daily)
-    const totalCredits = (result.remaining_total || 0) + (result.remaining_daily || 0);
+    // Get remaining credits (unified pool since Session 58)
+    const totalCredits = result.remaining_total || 0;
 
     return NextResponse.json({
       success: true,
